@@ -3,8 +3,16 @@ div {text-align:center}
 .blue {background-color:blue}
 .green {background-color:green}
 .bigText {font-size:1.2em}
-.gray {background-color:gray}
-button {font-size:2em; color:white; padding-top:1.1em; padding-bottom:1.1em; margin-bottom: 2em}
-button.small {padding:.4em}
-button.big {padding-right:.35em; padding-left:.35em; margin-right:2em;}
-p {margin:.2em}
+.gray {background-color:lightgray}
+button {font-size:2em; color:white; padding-top:1.1em; padding-bottom:1.1em; 
+	margin-bottom: 2em; border-radius: .3em; border-color:gray; margin: .5em;}
+button.small {padding:.4em; }
+button.big {padding-right:.35em; padding-left:.35em; margin-right:2em; }
+p {margin:.3em}
+.butoff{
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.nobutton{
+  opacity: 0;
+}
