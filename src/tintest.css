@@ -19,8 +19,8 @@ p {margin:.3em}
 
 .slidecontainer {
   width: 60%; /* Width of the outside container */
-  margin-left: auto !important;
-  margin-right: auto !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* The slider itself */
@@ -32,23 +32,15 @@ p {margin:.3em}
   border-radius: 2em;
   background: lightgray; /* Grey background */
   outline: none; /* Remove outline */
-  opacity: 0.2; /* Set transparency (for mouse-over effects on hover) */
+  opacity: 0.8; /* Set transparency (for mouse-over effects on hover) */
   -webkit-transition: .2s; /* 0.2 seconds transition on hover */
   transition: opacity .2s;
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-.slider::-webkit-slider-thumb {
+.slider::-webkit-slider-thumb, .slider::-moz-range-thumb {
   -webkit-appearance: none; /* Override default look */
   appearance: none;
-  width: 2em; /* Set a specific slider handle width */
-  height: 2em; /* Slider handle height */
-  border-radius: 50%;
-  background: blue; /* blue background */
-  cursor: pointer; /* Cursor on hover */
-}
-
-.slider::-moz-range-thumb {
   width: 2em; /* Set a specific slider handle width */
   height: 2em; /* Slider handle height */
   border-radius: 50%;

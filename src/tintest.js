@@ -48,14 +48,14 @@ $.when( $.ready ).then(() => {
                 Presse the <strong> I am happy </strong> button when you are finished. </p>");
                 $("#ansButtons button").remove();
                 $("#startId").html('Playing');  
+                $("#ratingSlider").show();
                 //$("#startId").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
                 $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
-                tonef = randomfrequencies[count];
+                //tonef = randomfrequencies[count];
             break;
 
         }; 
             
-        //const timeout = 1;
             setTimeout(() => {
                 playSound();
                 //$("#startId").show('slow');
@@ -69,7 +69,6 @@ $.when( $.ready ).then(() => {
             }, 3000);
     });
 
-     //playSound();
     $("button.answer").click((event) => {
         //$("button.answer").prop('disabled', true);
         const ansSofter = event.target.id === "down" ? true : false;
@@ -160,7 +159,7 @@ $.when( $.ready ).then(() => {
                     };
                 //};
             break;
-            case 2:
+            case 2:  //This is the rating section
                 rating[count] = ratingSlider.value;
             break;
         };
