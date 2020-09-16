@@ -17,6 +17,16 @@ p {margin:.3em}
   opacity: 0;
 }
 
+.column{
+	float:right;
+}
+.left {
+	width: 20%;
+}
+.right{
+	width: 20%;
+}
+
 .slidecontainer {
   width: 60%; /* Width of the outside container */
   margin-left: auto;

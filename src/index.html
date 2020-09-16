@@ -8,39 +8,39 @@
 </head>
 <body>
 <div>
-    <h1>Tinnitus Testing Instructions</h1>
-    <div id="startingInstr" class="bigText">
-        <p> This is an experiment to measure your tinnitus </p>
-        <p> Before starting, you will need to calibrate the experiment </p>
-        <p> You will need to adjust the volume level on your computer to it's maximum </p>
-        <p> Don't worry - we won't play sounds that are so loud as to hurt your ears </p>
-        <p> After you have done this, push the <strong> I am happy </strong> button </p>
-<!--         <p> Push the <strong> play </strong> button to play a tone </p>
-        <p> Adjust the volume of the tone using the louder and softer buttons. </p>
-        <p> Your goal is to find a level for each tone that is fairly soft but comfortable to you. </p>
- -->    
-    </div>
+    <div class="row">
+        <div class="column">
+            <h1>Tinnitus Testing Instructions</h1>
+            <div id="startingInstr" class="bigText">
+                <p> This is an experiment to measure your tinnitus </p>
+                <p> Before starting, you will need to calibrate the experiment </p>
+                <p> You will need to adjust the volume level on your computer to it's maximum </p>
+                <p> Don't worry - we won't play sounds that are so loud as to hurt your ears </p>
+                <p> After you have done this, push the <strong> I am happy </strong> button </p>
+            </div>
+        </div>
+    <div class="column">
+        <div id="controls">
+            <button id="startId" class="small green butoff" >Start</button>
+        </div>
+        <div id="ansButtons">
+            <button id="down" class="blue big answer butoff" disabled="true">softer</button>
+            <button id="up" class="blue answer butoff">louder</button><br>
+        </div>
+        <div id="finishButton">
+            <button id="finish" class="small green">I am happy</button><br>
+        </div>
+        <div class="slidecontainer" style="display: none" id="ratingSlider">
+            <label>
+                <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
+                <span style="float:left; width:20%; text-align: left">Not at all similar </span>
+                <span style="float:left; width:20%; text-align: left"> Not very similar </span>
+                <span style="float:left; width:20%; text-align: center">Somewhat similar </span>
+                <span style="float:left; width:20%; text-align: right">Very Similar </span>
+                <span style="float:left; width:20%; text-align: right"> Identical </span>
+            </label>
 
-    <div id="controls">
-        <button id="startId" class="small green butoff" >Start</button>
-    </div>
-    <div id="ansButtons">
-        <button id="down" class="blue big answer butoff" disabled="true">softer</button>
-        <button id="up" class="blue answer butoff">louder</button><br>
-    </div>
-    <div id="finishButton">
-        <button id="finish" class="small green">I am happy</button><br>
-    </div>
-    <div class="slidecontainer" style="display: none" id="ratingSlider">
-        <label>
-            <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
-            <span style="float:left; width:20%; text-align: left">Not at all similar </span>
-            <span style="float:left; width:20%; text-align: left"> Not very similar </span>
-            <span style="float:left; width:20%; text-align: center">Somewhat similar </span>
-            <span style="float:left; width:20%; text-align: right">Very Similar </span>
-            <span style="float:left; width:20%; text-align: right"> Identical </span>
-        </label>
-
+        </div>
     </div>
 
 </div>
