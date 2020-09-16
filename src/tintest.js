@@ -3,30 +3,30 @@ let expcount = 0; //case 0 = calibration; case 1 = level matching; case 2 = pitc
 let tonef = 0; 
 var ampForPlayFunction;
 
-var frequencies = [250, 500, 1000];//, 4000, 8000]; //, 500, 1000, 2000, 3000, 4000, 6000, 8000];
-//var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 2000, 4000, 3000]; 
-//var rfreqs = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 
-//3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
-var frequenciesbracket = [250, 1000, 500];//, 4000, 8000]; //, 500, 1000, 2000, 3000, 4000, 6000, 8000];
-var rfreqs = [250, 500, 1000];//, 4000, 8000]; //, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+var frequencies = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 2000, 4000, 3000]; 
+var rfreqs = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 
+    3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+//var frequenciesbracket = [250, 1000, 500];//, 4000, 8000]; //, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+//var rfreqs = [250, 500, 1000];//, 4000, 8000]; //, 500, 1000, 2000, 3000, 4000, 6000, 8000];
 
 
 
 var step;
 var amp = []; 
-for (step = 0; step < frequenciesbracket.length; step++) {
-  amp.push(0.1);
+for (step = 0; step < frequencies.length; step++) {
+  amp.push(0.01);
 };
-amp=[0.4, 0.1, 0.001];
+//amp=[0.4, 0.1, 0.001];
 var ratingcount = [];
 let rating = [];
 for (step = 0; step < rfreqs.length; step++) {
-  ratingcount.push(step % (rfreqs.length / 1)); //ratingcount.push(step % (rfreqs.length / 3)); put back after testing!
+  ratingcount.push(step % (rfreqs.length / 3)); //put back after testing!
   rating.push(0);
 };
 shuffle(rfreqs,ratingcount); //shuffled frequencies and counter for rating
 var bracketcount = [0, 8, 1, 7, 2, 6, 3, 5, 4];  //counter for shuffled frequencies
-var bracketcount = [0, 2, 1];  //counter for shuffled frequencies
+//var bracketcount = [0, 2, 1];  //counter for shuffled frequencies
 
 let tonedur = 2; 
 let butpressHigh = 0; 
@@ -69,6 +69,8 @@ $.when( $.ready ).then(() => {
                 $("#startId").remove();
                 $("#down").remove();
                 $("#up").html('Play');
+                $("#up").css({'background-color': 'green'});
+
 
                // $("#startId").html('Play');  
                 $("#ratingSlider").show();
@@ -180,6 +182,14 @@ $.when( $.ready ).then(() => {
                 ampForPlayFunction = amp[count];
             };
             playSound();
+            if (expcount === 3){
+                $("#up").css({'opacity': '1','background-color' : 'orange'}); // Turning on the button while playing
+                $("#up").prop('disabled', true);
+            //$("#ansButtons button").prop('disabled', true);
+                setTimeout(() => {
+                    $("#up").css({'background-color': 'green'});
+                }, 2000);
+            };
 
             //console.log("button listen")
             $("#startId").css({'opacity': '1','background-color' : 'orange'}); // Turning on the button while playing
