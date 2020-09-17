@@ -296,7 +296,7 @@ function playSound() {
         tone.frequency.value = tonef;
 
         let toneamp = audioCtx.createGain();
-        toneamp.gain.setValueAtTime(0,audioCtx.currentTime);
+        toneamp.gain.setValueAtTime(0.000001,audioCtx.currentTime);
         toneamp.gain.exponentialRampToValueAtTime(ampForPlayFunction,audioCtx.currentTime + 0.04);
         //let modulator = audioCtx.createOscillator();
         //modulator.type = 'sine';
