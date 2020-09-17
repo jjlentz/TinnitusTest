@@ -58,13 +58,13 @@ $.when( $.ready ).then(() => {
             break;
 
             case 3:
-                $("#startingInstr").html("<p id='Instructions'>This is the pitch rating portion of the experiment. <br>\
-                When you push the <strong> Play </strong> button, you will hear a sound. <br>\
-                Your task is to rate the similarity of the pitch of that sound to the pitch of your tinnitus. <br>\
-                Using the slider, provide ratings between <strong> not at all similar </strong> and \
-                <strong> identical </strong> .<br>\
-                You may push the <strong> Play </strong> button as many times as you wish to hear the sound.<br>\
-                Press the <strong> I am happy </strong> button when you satisfied with your rating. </p>");
+                $("#startingInstr").html("<li id='Instructions'>This is the pitch rating portion of the experiment.</li>\
+                <li>When you push the <strong> Play </strong> button, you will hear a sound.</li>\
+                <li>Your task is to rate the similarity of the pitch of that sound to the pitch of your tinnitus.</li>\
+                <li>Using the slider, provide ratings between <strong> not at all similar </strong> and \
+                <strong>identical</strong>.</li>\
+                <li>You may push the <strong> Play </strong> button as many times as you wish to hear the sound.</li>\
+                <li>Press the <strong> I am happy </strong> button when you satisfied with your rating. </li>");
                 //$("#ansButtons button").remove();
                 $("#startId").remove();
                 $("#down").remove();
@@ -149,8 +149,8 @@ $.when( $.ready ).then(() => {
         //console.log(expcount,butpressHigh,butpressLow,count)
         if ((expcount != 3) && ((butpressHigh === 2) || (butpressLow === 2) || 
             (count == frequenciesbracket.length))){
-            $("#startingInstr").html("<p id='Instructions'>Thank you! <br>\
-            Take a short break, and push start to do the pitch rating phase of the study. </p>");
+            $("#startingInstr").html("<li id='Instructions'>Thank you! </li>\
+            <li>Take a short break, and push start to do the pitch rating phase of the study. </li>");
             $("#ansButtons button").prop('disabled', true);
             $("#ansButtons button").css({'opacity': '.4'});
             $("#startId").html('Start'); 
@@ -203,14 +203,14 @@ $.when( $.ready ).then(() => {
         switch (expcount) {
             
             case 0:
-                $("#startingInstr").html("<p id='Instructions'>Your job is to match the levels of these\
-                sounds to the level of your tinnitus. <br>\
-                Once you push <strong> Start </strong>, you will hear a sound. <br>\
-                If that sound is softer than your tinnitus or you can't hear it, make it louder by clicking the louder button. <br>\
-                If that louder than your tinnitus, make it softer by clicking the softer button.<br>\
-                Keep doing this until you find a sound level that is equally loud as your tinnitus <br>\
-                Then, click the <strong> I am happy </strong> button to play the next sound and repeat the process.<br>\
-                Press <strong> Start </strong> when you are ready to go </p>");
+                $("#startingInstr").html("<li id='Instructions'>Your job is to match the levels of these\
+                sounds to the level of your tinnitus. </li>\
+                <li>Once you push <strong> Start </strong>, you will hear a sound. </li>\
+                <li>If that sound is softer than your tinnitus or you can't hear it, make it louder by clicking the louder button. </li>\
+                <li>If that louder than your tinnitus, make it softer by clicking the softer button.</li>\
+                <li>Keep doing this until you find a sound level that is equally loud as your tinnitus </li>\
+                <li>Then, click the <strong> I am happy </strong> button to play the next sound and repeat the process.</li>\
+                <li>Press <strong> Start </strong> when you are ready to go </li>");
                 
                 $("#finishButton button").prop('disabled', false);
                 $("#finishButton button").css({'opacity': '1','cursor': 'pointer' });
@@ -227,13 +227,13 @@ $.when( $.ready ).then(() => {
             case 1: //This is the level matching section
                 //if (confirm("Confirm your response")){
                     if (count === (frequencies.length - 1)) {
-                        $("#startingInstr").html("<p id='Instructions'>Thank you!  The levels have been set! <br>\
-                        Take a short break, and push start to do the pitch matching phase of the study. <br>\
-                        In the pitch matching portion of the experiment, <br>\
-                        You will hear a sound when the <strong> Playing </strong> button is active. <br>\
-                        Sometimes this sound will have a high pitch and sometimes it will have a low pitch. <br>\
-                        If your tinnitus is higher than the sound, press the <strong> higher </strong> button. <br>\
-                        If your tinnitus is lower than the sound, press the <strong> lower </strong> button.<br>\</p>");
+                        $("#startingInstr").html("<li id='Instructions'>Thank you!  The levels have been set! </li>\
+                        <li>Take a short break, and push start to do the pitch matching phase of the study. </li>\
+                        <li>In the pitch matching portion of the experiment, </li>\
+                        <li>You will hear a sound when the <strong> Playing </strong> button is active. </li>\
+                        <li>Sometimes this sound will have a high pitch and sometimes it will have a low pitch. </li>\
+                        <li>If your tinnitus is higher than the sound, press the <strong> higher </strong> button. </li>\
+                        <li>If your tinnitus is lower than the sound, press the <strong> lower </strong> button.</li>");
 
                         $("#ansButtons button").prop('disabled', true);
                         $("#ansButtons button").css({'opacity': '.4'});
@@ -266,7 +266,7 @@ $.when( $.ready ).then(() => {
                     tonef = rfreqs[count];
                     ampForPlayFunction = amp[ratingcount[count]];
                     if (count === rfreqs.length) {
-                        $("#startingInstr").html("<p id='Instructions'>Thank you!  You are finished with the experiment.<br>\</p>");
+                        $("#startingInstr").html("<li id='Instructions'>Thank you!  You are finished with the experiment.</li>");
                         $("#up").remove();
                         $("#finish").remove();
                         $("#ratingSlider").remove();

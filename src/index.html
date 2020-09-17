@@ -7,19 +7,22 @@
     <script src="tintest.js"></script>
 </head>
 <body>
+<header>
+    <h1>Tinnitus Testing</h1>
+</header>
 <div>
     <div class="row">
-        <div class="column">
-            <h1>Tinnitus Testing Instructions</h1>
-            <div id="startingInstr" class="bigText">
-                <p> This is an experiment to measure your tinnitus </p>
-                <p> Before starting, you will need to calibrate the experiment </p>
-                <p> You will need to adjust the volume level on your computer to it's maximum </p>
-                <p> Don't worry - we won't play sounds that are so loud as to hurt your ears </p>
-                <p> After you have done this, push the <strong> I am happy </strong> button </p>
-            </div>
+        <div class="column instructions">
+            <h2>Instructions</h2>
+            <ul id="startingInstr" class="bigText">
+                <li> This is an experiment to measure your tinnitus. </li>
+                <li> Before starting, you will need to calibrate the experiment. </li>
+                <li> You will need to adjust the volume level on your computer to it's maximum. </li>
+                <li> Don't worry - we won't play sounds that are so loud as to hurt your ears. </li>
+                <li> After you have read these instructions, please click the <strong> I am happy </strong> button. </li>
+            </ul>
         </div>
-    <div class="column">
+    <div class="experiment">
         <div id="controls">
             <button id="startId" class="small green butoff" >Start</button>
         </div>
