@@ -1,8 +1,14 @@
 body {font-family: sans-serif}
-div {text-align:center}
+div, header {text-align:center}
 .blue {background-color:blue}
 .green {background-color:green}
-.bigText {font-size:1.2em}
+.bigText {
+  font-size:1.2em;
+  text-align: left;
+}
+li {
+  margin-bottom: .2rem;
+}
 .gray {background-color:lightgray}
 button {font-size:2em; color:white; padding-top:1.1em; padding-bottom:1.1em; 
 	margin-bottom: 2em; border-radius: .3em; border-color:gray; margin: .5em;}
@@ -13,12 +19,17 @@ p {margin:.3em}
   opacity: 0.4;
   cursor: not-allowed;
 }
-.nobutton{
+.nobutton {
   opacity: 0;
 }
-
-.column{
-	float:right;
+.row {
+  display: flex;
+}
+.instructions {
+  flex: 40%;
+}
+.experiment {
+  flex: 60%;
 }
 .left {
 	width: 20%;
