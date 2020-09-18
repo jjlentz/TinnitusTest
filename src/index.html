@@ -1,37 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
     <meta charset="UTF-8">
-    <title>Tinnitus Testing</title>
+    <title >Tinnitus Testing</title>
     <link rel="stylesheet" href="tintest.css"/>
     <script src="jquery-3.5.1.js"></script>
     <script src="tintest.js"></script>
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 </head>
 <body>
 <header>
-    <h1>Tinnitus Testing</h1>
+    <h1 id="mainHeader" class=dkblue>Tinnitus Testing</h1>
 </header>
 <div>
     <div class="row">
         <div class="column instructions">
-            <h2>Instructions</h2>
+            <h2 id="instruct" class=dkblue>Instructions</h2>
             <ul id="startingInstr" class="bigText">
-                <li> This is an experiment to measure your tinnitus. </li>
-                <li> Before starting, you will need to calibrate the experiment. </li>
-                <li> You will need to adjust the volume level on your computer to it's maximum. </li>
+                <li style ="color:firebrick"><strong> Set the volume on your computer to maximum. </strong></li>
+                <li> After you set the volume, click the <strong> Done </strong> button. </li><br>
                 <li> Don't worry - we won't play sounds that are so loud as to hurt your ears. </li>
-                <li> After you have read these instructions, please click the <strong> I am happy </strong> button. </li>
+
             </ul>
         </div>
     <div class="experiment">
         <div id="controls">
             <button id="startId" class="small green butoff" >Start</button>
         </div>
+        <div id="soundIndicator" style="display: none">
+            <i class='fas fa-circle blink' style='font-size:3em;color:darkorange'></i>
+        </div>
         <div id="ansButtons">
-            <button id="down" class="blue big answer butoff" disabled="true">softer</button>
-            <button id="up" class="blue answer butoff">louder</button><br>
+            <button id="down" class="blue big answer butoff" disabled="true">tinnitus is softer</button>
+            <button id="up" class="blue answer butoff">tinnitus is louder</button><br>
         </div>
         <div id="finishButton">
-            <button id="finish" class="small green">I am happy</button><br>
+            <button id="finish" class="small green">Done</button><br>
         </div>
         <div class="slidecontainer" style="display: none" id="ratingSlider">
             <label>

@@ -2,6 +2,7 @@ body {font-family: sans-serif}
 div, header {text-align:center}
 .blue {background-color:blue}
 .green {background-color:green}
+.dkblue {color:darkblue;}
 .bigText {
   font-size:1.2em;
   text-align: left;
@@ -16,7 +17,7 @@ button.small {padding:.4em; }
 button.big {padding-right:.35em; padding-left:.35em; margin-right:2em; }
 p {margin:.3em}
 .butoff{
-  opacity: 0.4;
+  opacity: 0.1;
   cursor: not-allowed;
 }
 .nobutton {
@@ -36,6 +37,18 @@ p {margin:.3em}
 }
 .right{
 	width: 20%;
+}
+
+.blink {
+     animation: blinker 0.2s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+}
+ @keyframes blinker {
+     from {
+         opacity: 1;
+    }
+     to {
+         opacity: 0;
+    }
 }
 
 .slidecontainer {
