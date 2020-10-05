@@ -12,7 +12,7 @@ var rfreqs = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250
 var step;
 var amp = []; 
 for (step = 0; step < frequencies.length; step++) {
-  amp.push(0.01);
+  amp.push(0.5);
 };
 //amp=[0.4, 0.1, 0.001];
 var ratingcount = [];
@@ -92,7 +92,7 @@ $.when( $.ready ).then(() => {
         if (ansSofter) {
             switch (expcount) {
                 case 1:
-                    amp[count] = 1.78 * amp[count]; // if true, make sound 5 dB louder. 
+                    amp[count] = 0.56 * amp[count]; // if true, make sound 5 dB louder. 
                     tonef = frequencies[count];
                     break;
                 case 2:   
@@ -108,7 +108,10 @@ $.when( $.ready ).then(() => {
         if (ansLouder) {
             switch (expcount) {
                 case 1 :
-                    amp[count] = 0.56 * amp[count]; // if true, make sound 5 dB softer.  
+                    amp[count] = 1.78 * amp[count]; // if true, make sound 5 dB softer.  
+                    if (amp[count] > 1) {
+                        amp[count] = 1;
+                    }
                     tonef = frequencies[count];
                     break;
                 case 2 :
@@ -119,18 +122,17 @@ $.when( $.ready ).then(() => {
                     }
                     break;
             };
-
+            console.log(amp[count])
 
         };   
         //console.log(expcount,butpressHigh,butpressLow,count)
-        if ((expcount != 3) && ((butpressHigh === 2) || (butpressLow === 2) || 
+        if ((expcount != 3) && ((butpressHigh === 2) || (butpressLow === 2) ||
             (count == frequenciesbracket.length))){
             $("#instruct").html('Instructions: Break');
             $("#startingInstr").html("<li id='Instructions'>Thank you! </li>\
             <li>Take a short break, and push start to do the pitch rating phase of the study. </li>");
             $("#ansButtons button").prop('disabled', true);
             $("#ansButtons button").css({'opacity': '.1'});
-            // $("#startId").html('Start'); 
             $("#startId").prop('disabled', false);
             $("#startId").css({'opacity': '1'});
             expcount++
@@ -145,7 +147,13 @@ $.when( $.ready ).then(() => {
                 ampForPlayFunction = amp[count];
             };
             playSound();
+        };
 
+        if (amp[count] === 1){
+            $("#startingInstr").html("<li id='Instructions'>You have reached the maximum sound level. </li>\
+            <li>Press <strong> Done </strong> to hear the next sound. </li>");
+            $("#ansButtons button").prop('disabled', true);
+            $("#ansButtons button").css({'opacity': '.1'});
         };
              
     });
