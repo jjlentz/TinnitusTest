@@ -36,7 +36,7 @@ $.when( $.ready ).then(() => {
         $("#startId").css({'opacity': '.1'});
   
         switch (expcount) {
-            case 2:
+            case 2:  //Pitch measurement - single frequency
                 $("#startId").prop('disabled', true);
                 $("#startId").css({'opacity': '.1'});
                 $("#instruct").html('Instructions: Pitch Comparison');
@@ -49,7 +49,7 @@ $.when( $.ready ).then(() => {
                 tonef = frequenciesbracket[0];
             break;
 
-            case 3:
+            case 3:  // Pitch rating part of the experiment
                 $("#instruct").html('Instructions: Pitch Rating');
                 $("#startingInstr").html("<li id='Instructions'>Here, we are trying to measure the pitch\
                     of your tinnitus using a different procedure.</li>\
@@ -147,7 +147,7 @@ $.when( $.ready ).then(() => {
             };
             playSound();
         };
-        console.log(expcount, count, amp[count], butpressHigh, butpressLow)
+        //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
 
         if (amp[count] >= 1){
             $("#startingInstr").html("<li id='Instructions'>You have reached the maximum sound level. </li>\
@@ -161,7 +161,7 @@ $.when( $.ready ).then(() => {
     });
 
     $("#finish").click(() => {
-        console.log("finish",expcount)
+        //console.log("finish",expcount)
         switch (expcount) {
             
             case 0:
@@ -265,24 +265,33 @@ function playSound() {
         $("#soundIndicator").show();
         $("#soundIndicator").css({'opacity': '1'}); // Turning on the button while playing
 
-        var AudioContext = window.AudioContext || window.webkitAudioContext;
-        var audioCtx = new AudioContext();
-        let tone = audioCtx.createOscillator();
-        tone.type = 'sine';
-        tone.frequency.value = tonef;
+        var sound = new Howl({
+             src: ['wave' + tonef + '.wav'],
+             html5: true // Force to HTML5 so that the audio can stream in (best for large files).
+ 
+            });
 
-        let toneamp = audioCtx.createGain();
-        toneamp.gain.setValueAtTime(0.000001,audioCtx.currentTime);
-        toneamp.gain.exponentialRampToValueAtTime(ampForPlayFunction,audioCtx.currentTime + 0.04);
-        //let modulator = audioCtx.createOscillator();
-        //modulator.type = 'sine';
-        //modulator.frequency.value = 1.5;
+        Howler.volume(ampForPlayFunction)
+        sound.play();
 
-        //modulator.connect(toneamp.gain);
-        tone.connect(toneamp).connect(audioCtx.destination);
-        //modulator.start();
-        tone.start();
-        tone.stop(audioCtx.currentTime + tonedur)
+        // var AudioContext = window.AudioContext || window.webkitAudioContext;
+        // var audioCtx = new AudioContext();
+        // let tone = audioCtx.createOscillator();
+        // tone.type = 'sine';
+        // tone.frequency.value = tonef;
+
+        // let toneamp = audioCtx.createGain();
+        // toneamp.gain.setValueAtTime(0.000001,audioCtx.currentTime);
+        // toneamp.gain.exponentialRampToValueAtTime(ampForPlayFunction,audioCtx.currentTime + 0.04);
+        // //let modulator = audioCtx.createOscillator();
+        // //modulator.type = 'sine';
+        // //modulator.frequency.value = 1.5;
+
+        // //modulator.connect(toneamp.gain);
+        // tone.connect(toneamp).connect(audioCtx.destination);
+        // //modulator.start();
+        // tone.start();
+        // tone.stop(audioCtx.currentTime + tonedur)
         setTimeout(() => {
             $("#finish").prop('disabled', false);
             if (ampForPlayFunction < 1) {
