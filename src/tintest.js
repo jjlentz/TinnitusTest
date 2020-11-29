@@ -268,30 +268,11 @@ function playSound() {
         var sound = new Howl({
              src: ['wave' + tonef + '.wav'],
              html5: true // Force to HTML5 so that the audio can stream in (best for large files).
- 
             });
 
         Howler.volume(ampForPlayFunction)
         sound.play();
 
-        // var AudioContext = window.AudioContext || window.webkitAudioContext;
-        // var audioCtx = new AudioContext();
-        // let tone = audioCtx.createOscillator();
-        // tone.type = 'sine';
-        // tone.frequency.value = tonef;
-
-        // let toneamp = audioCtx.createGain();
-        // toneamp.gain.setValueAtTime(0.000001,audioCtx.currentTime);
-        // toneamp.gain.exponentialRampToValueAtTime(ampForPlayFunction,audioCtx.currentTime + 0.04);
-        // //let modulator = audioCtx.createOscillator();
-        // //modulator.type = 'sine';
-        // //modulator.frequency.value = 1.5;
-
-        // //modulator.connect(toneamp.gain);
-        // tone.connect(toneamp).connect(audioCtx.destination);
-        // //modulator.start();
-        // tone.start();
-        // tone.stop(audioCtx.currentTime + tonedur)
         setTimeout(() => {
             $("#finish").prop('disabled', false);
             if (ampForPlayFunction < 1) {
