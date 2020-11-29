@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
     <meta charset="UTF-8">
     <title>Tinnitus Testing</title>
     <link rel="stylesheet" href="tintest.css"/>
@@ -18,38 +19,38 @@
             <h2 id="instruct" class=dkblue>Instructions</h2>
             <ul id="startingInstr" class="bigText">
                 <li style ="color:firebrick"><strong> Set the volume on your computer to maximum. </strong></li>
-                <li> After you set the volume, click the <strong> Done </strong> button. </li><br>
+                <li> After you set the volume, click the <strong> Done </strong> button. </li>
                 <li> Don't worry - we won't play sounds that are so loud as to hurt your ears. </li>
 
             </ul>
         </div>
-    <div class="experiment">
-        <div id="controls">
-            <button id="startId" class="small green butoff" disabled="true">Start</button>
-        </div>
-        <div id="soundIndicator" style="display: none">
-            <i class='fas fa-circle blink' style='font-size:3em;color:darkorange'></i>
-        </div>
-        <div id="ansButtons">
-            <button id="down" class="blue big answer butoff" disabled="true">tinnitus is softer</button>
-            <button id="up" class="blue answer butoff" disabled="true">tinnitus is louder</button><br>
-        </div>
-        <div id="finishButton">
-            <button id="finish" class="small green">Done</button><br>
-        </div>
-        <div class="slidecontainer" style="display: none" id="ratingSlider">
-            <label>
-                <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
-                <span style="float:left; width:20%; text-align: left">Not at all similar </span>
-                <span style="float:left; width:20%; text-align: left"> Not very similar </span>
-                <span style="float:left; width:20%; text-align: center">Somewhat similar </span>
-                <span style="float:left; width:20%; text-align: right">Very Similar </span>
-                <span style="float:left; width:20%; text-align: right"> Identical </span>
-            </label>
+        <div class="experiment">
+            <div id="controls">
+                <button id="startId" class="small green butoff" disabled="true">Start</button>
+            </div>
+            <div id="soundIndicator" style="display: none">
+                <i class='fas fa-circle blink' style='font-size:3em;color:darkorange'></i>
+            </div>
+            <div id="ansButtons">
+                <button id="down" class="blue big answer butoff" disabled="true">tinnitus is softer</button>
+                <button id="up" class="blue answer butoff" disabled="true">tinnitus is louder</button><br>
+            </div>
+            <div id="finishButton">
+                <button id="finish" class="small green">Done</button><br>
+            </div>
+            <div class="slidecontainer" style="display: none" id="ratingSlider">
+                <label>
+                    <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
+                    <span style="float:left; width:20%; text-align: left">Not at all similar </span>
+                    <span style="float:left; width:20%; text-align: left"> Not very similar </span>
+                    <span style="float:left; width:20%; text-align: center">Somewhat similar </span>
+                    <span style="float:left; width:20%; text-align: right">Very Similar </span>
+                    <span style="float:left; width:20%; text-align: right"> Identical </span>
+                </label>
 
+            </div>
         </div>
     </div>
-
 </div>
 </body>
 </html>
