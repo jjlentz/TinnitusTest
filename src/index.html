@@ -14,14 +14,20 @@
     <h1 id="mainHeader" class=dkblue>Tinnitus Testing</h1>
 </header>
 <div>
-    <div class="row">
+    <form id="participantForm">
+        <label>
+            Participant ID
+            <input type="text" id="participantId" maxlength="256" size="36" required placeholder="<your participant id>"/>
+        </label>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="experimentRow" class="row" style="display: none">
         <div class="column instructions">
             <h2 id="instruct" class=dkblue>Instructions</h2>
             <ul id="startingInstr" class="bigText">
                 <li style ="color:firebrick"><strong> Set the volume on your computer to maximum. </strong></li>
                 <li> After you set the volume, click the <strong> Done </strong> button. </li>
                 <li> Don't worry - we won't play sounds that are so loud as to hurt your ears. </li>
-
             </ul>
         </div>
         <div class="experiment">
