@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const querystring = require('querystring');
 const csv = require('fast-csv');
+const findParticipantIndex = require('./common');
 
 const doWrite = async (rows, s3, params) => {
     const data = await csv.writeToString(rows);
@@ -32,8 +33,6 @@ const appendCsv = async (newRow, s3, bucket) => {
                 resolve();
             });
     }))
-
-
 }
 
 const saveStartTime = async (newRow, s3, bucket) => {
@@ -54,31 +53,11 @@ const saveStartTime = async (newRow, s3, bucket) => {
 exports.lambdaHandler = async (event, context) => {
     const bucket = process.env.EXPERIMENT_BUCKET;
 
-    const getParams = {
-        Bucket: bucket,
-        Key: 'participants.txt'
-    }
-    const participantIds = [];
-    const s3 = new AWS.S3();
-    try {
-        const file = await s3.getObject(getParams).promise();
-        const text = file.Body.toString('ascii');
-        const lines = text.split('\n');
-        lines.forEach(l => participantIds.push(l));
-    } catch (err) {
-        console.log(err);
-    }
     const rawBody = event.body;
-    let id = '';
-    let data;
-    if (rawBody.startsWith('participantId=')) {
-        data = querystring.parse(rawBody);
-        id = data.participantId
-    } else {
-        data = JSON.parse(event.body);
-        id = data.participantId;
-    }
-    const index = participantIds.indexOf(id);
+    const data = querystring.parse(rawBody);
+    const id = data.participantId
+
+    const index = findParticipantIndex(id);
     if (index > -1) {
         await saveStartTime(data, s3, bucket);
         return {
