@@ -26,9 +26,27 @@ var bracketcount = [0, 8, 1, 7, 2, 6, 3, 5, 4];  //counter for shuffled frequenc
 
 let butpressHigh = 0; 
 let butpressLow = 0;
-
+let pid = '';
 
 $.when( $.ready ).then(() => {
+    $('#participantForm').submit((event) => {
+        event.preventDefault();
+        pid = $('#participantId').val();
+        $.ajax({
+            type: 'POST',
+            url: 'https://pwo6vbnvo1.execute-api.us-east-2.amazonaws.com/Prod/hello/',
+            dataType: 'json',
+            data: {participantId: pid, browser: navigator.userAgent}
+        })
+        .done(() => {
+            pid = val;
+            $('#participantForm').hide();
+            $('#experimentRow').show();
+        })
+        .fail(() => {
+            $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
+        });
+    });
     $("#startId").click(() => {
         $("#ansButtons button").prop('disabled', false);
         $("#ansButtons button").css({'opacity': '1','cursor': 'pointer' });
@@ -241,7 +259,7 @@ $.when( $.ready ).then(() => {
                         $("#up").remove();
                         $("#finish").remove();
                         $("#ratingSlider").remove();
-
+                        submitExperimentResults();
                     } else {
                         playSound();
                         setTimeout(() => {
@@ -309,7 +327,36 @@ function shuffle(array,ratingcount) {
     [array[i], array[j]] = [array[j], array[i]];
     [ratingcount[i], ratingcount[j]] = [ratingcount[j], ratingcount[i]];
   }
-  return array
+  //return array
+}
+
+const submitExperimentResults = () => {
+    frequencies // 11
+    frequenciesbracket // 11
+    rfreqs // 33
+    const myData = {
+        participantId: pid
+    }
+    for (let i = 0; i < frequencies.length; i++) {
+        myData['frequencies'+i] = frequencies[i];
+    }
+    for (let i = 0; i < frequenciesbracke.length; i++) {
+        myData['frequenciesbracket'+i] = frequenciesbracket[i];
+    }
+    for (let i = 0; i < rfreqs.length; i++) {
+        myData['rfreqs'+i] = rfreqs[i];
+    }
+    $.ajax({
+        type: 'POST',
+        url: 'http://whatever',
+        dataType: 'json',
+        data: myData
+    }).done(() => {
+        console.log('DATA SAVED');
+    }).fail((err) => {
+        console.error('Data not saved', err);
+        $("#startingInstr").html("<li id='Instructions'>OPPS - something went completely wrong saving your experiment data.</li>");
+    });
 }
 
 
