@@ -4,7 +4,7 @@ Description: Backend for collecting TinnitusTest data
 
 
 Parameters:
-  StackPrefix
+  StackPrefix:
     Description: The stack prefix
     Type: String
     AllowedPattern: '[a-z0-9]+'
@@ -120,3 +120,23 @@ Resources:
             QueryString: false
           TargetOriginId: 'tinnitus-test'
           ViewerProtocolPolicy: 'redirect-to-https'
+
+Outputs:
+#  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+#  # Find out more about other implicit resources you can reference within SAM
+#  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  StartExperimentApi:
+    Description: "API Gateway endpoint URL for Prod stage for start Experiment function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/start/"
+  CompleteExperimentApi:
+    Description: "API Gateway endpoint URL for Prod stage for complete Experiment function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/complete/"
+  CloudFrontDomain:
+    Description: "Where to find the index file for the experiment"
+    Value: !GetAtt CloudfrontDistribution.DomainName
+  ExperimentResultBucket:
+    Description: "for results files"
+    Value: !Ref ExperimentResultBucket
+  ExperimentBucket:
+    Description: "for experiment resources"
+    Value: !Ref ExperimentBucket
