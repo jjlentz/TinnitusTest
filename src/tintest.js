@@ -40,7 +40,6 @@ $.when( $.ready ).then(() => {
             data: {participantId: pid, browser: navigator.userAgent}
         })
         .done(() => {
-            pid = val;
             $('#participantForm').hide();
             $('#experimentRow').show();
         })

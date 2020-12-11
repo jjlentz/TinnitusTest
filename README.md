@@ -43,5 +43,14 @@ cd ../resources
 aws s3 cp results.csv s3://<experiment-results-bucket>/results.csv --profile <your_profile>
 cd ???
 aws s3 cp participants.txt s3://<experiment-results-bucket>/participants.txt --profile <your_profile>
-
 ```
+
+After the deployment, the experiment will not be available at the `CloudFrontDomain` value for 
+several minutes. Once it becomes available, any changes to index.html or any other front end resources
+freshly copied to `<experiment-bucket>` will not become available to the UI without expiring the
+resources cache with:
+```bash
+aws cloudfront create-invalidation --distribution-id <distribution id> --paths "/*"
+```
+
+Look up the distribution id in the cloudfront portion of the AWS console.

@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const querystring = require('querystring');
 const csv = require('fast-csv');
-const findParticipantIndex = require('./common');
+const common = require('./common');
 
 const doWrite = async (rows, s3, params) => {
     const data = await csv.writeToString(rows);
@@ -56,8 +56,8 @@ exports.lambdaHandler = async (event, context) => {
     const rawBody = event.body;
     const data = querystring.parse(rawBody);
     const id = data.participantId
-
-    const index = findParticipantIndex(id);
+    const s3 = new AWS.S3();
+    const index = await common.findParticipantIndex(id, s3, bucket);
     if (index > -1) {
         await saveStartTime(data, s3, bucket);
         return {

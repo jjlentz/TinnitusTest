@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const querystring = require('querystring');
 const csv = require('fast-csv');
-const findParticipantIndex = require('./common');
+const common = require('./common');
 
 const doWrite = async (rows, s3, params) => {
     const data = await csv.writeToString(rows, {headers: true});
@@ -47,7 +47,8 @@ exports.lambdaHandler = async (event, context) => {
     const bucket = process.env.EXPERIMENT_BUCKET;
     const rawBody = event.body;
     const data = querystring.parse(rawBody);
-    const index = findParticipantIndex(data.participantId);
+    const s3 = new AWS.S3();
+    const index = await common.findParticipantIndex(data.participantId, s3, bucket);
     if (index > -1) {
         const resultParams = {
             Bucket: bucket,
@@ -55,7 +56,7 @@ exports.lambdaHandler = async (event, context) => {
         }
 
         let text = '';
-        const s3 = new AWS.S3();
+
         const endDateString = new Date().toISOString()
         for (const [key, value] of Object.entries(data)) {
             if (key !== 'participantId') {
