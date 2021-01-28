@@ -1,0 +1,142 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Backend for collecting TinnitusTest data
+
+
+Parameters:
+  StackPrefix:
+    Description: The stack prefix
+    Type: String
+    AllowedPattern: '[a-z0-9]+'
+    ConstraintDescription: 'StackPrefix must match pattern [a-z0-9]+'
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  CompleteExperimentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: 'Save experimental data after subject has completed experiment'
+      FunctionName: !Join ['-', [!Ref StackPrefix, 'complete-experiment-function']]
+      CodeUri: sam-src/
+      Handler: complete.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        Complete:
+          Type: Api
+          Properties:
+            Path: /complete
+            Method: post
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ExperimentResultBucket
+      Environment:
+        Variables:
+          EXPERIMENT_BUCKET: !Ref ExperimentResultBucket
+
+  StartExperimentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: 'Confirm the participantId and record the experiment start'
+      FunctionName: !Join ['-', [!Ref StackPrefix, 'start-experiment-function']]
+      CodeUri: sam-src/
+      Handler: start.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        StartExperiment:
+          Type: Api
+          Properties:
+            Path: /start
+            Method: post
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ExperimentResultBucket
+      Environment:
+        Variables:
+          EXPERIMENT_BUCKET: !Ref ExperimentResultBucket
+
+  ExperimentResultBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['-', [!Ref StackPrefix, 'experiment-results']]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+
+  ExperimentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['-', [!Ref StackPrefix, 'experiment-src']]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+
+  ExperimentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ExperimentBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: 's3:GetObject'
+            Resource:
+              - !Sub "arn:aws:s3:::${ExperimentBucket}/*"
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'Experiment serverless html and related source files'
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: 'Experiment html file'
+        DefaultRootObject: "index.html"
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+          - Id: tinnitus-test
+            DomainName: !GetAtt ExperimentBucket.DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}'
+        DefaultCacheBehavior:
+          Compress: true
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: 'tinnitus-test'
+          ViewerProtocolPolicy: 'redirect-to-https'
+
+Outputs:
+#  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+#  # Find out more about other implicit resources you can reference within SAM
+#  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  StartExperimentApi:
+    Description: "API Gateway endpoint URL for Prod stage for start Experiment function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/start/"
+  CompleteExperimentApi:
+    Description: "API Gateway endpoint URL for Prod stage for complete Experiment function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/complete/"
+  CloudFrontDomain:
+    Description: "Where to find the index file for the experiment"
+    Value: !GetAtt CloudfrontDistribution.DomainName
+  ExperimentResultBucket:
+    Description: "for results files"
+    Value: !Ref ExperimentResultBucket
+  ExperimentBucket:
+    Description: "for experiment resources"
+    Value: !Ref ExperimentBucket

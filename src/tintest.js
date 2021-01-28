@@ -26,9 +26,27 @@ var bracketcount = [0, 8, 1, 7, 2, 6, 3, 5, 4];  //counter for shuffled frequenc
 
 let butpressHigh = 0; 
 let butpressLow = 0;
-
+let pid = '';
+let tinnitusPitchMatch = 0
 
 $.when( $.ready ).then(() => {
+    $('#participantForm').submit((event) => {
+        event.preventDefault();
+        pid = $('#participantId').val();
+        $.ajax({
+            type: 'POST',
+            url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
+            dataType: 'json',
+            data: {participantId: pid, browser: navigator.userAgent}
+        })
+        .done(() => {
+            $('#participantForm').hide();
+            $('#experimentRow').show();
+        })
+        .fail(() => {
+            $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
+        });
+    });
     $("#startId").click(() => {
         $("#ansButtons button").prop('disabled', false);
         $("#ansButtons button").css({'opacity': '1','cursor': 'pointer' });
@@ -216,6 +234,7 @@ $.when( $.ready ).then(() => {
 
                         count++; //amp[count] = startingamp[count];
                         tonef = frequencies[count];
+                        tinnitusPitchMatch = tonef;
                         ampForPlayFunction = amp[count];
                         playSound();
                         setTimeout(() => {
@@ -230,7 +249,7 @@ $.when( $.ready ).then(() => {
             break;
             case 3:  //This is the rating section
                 //if (confirm("Confirm your response")){
-                    rating[count] = document.getElementById("rangeSlider").value;    
+                    rating[count] = document.getElementById("rangeSlider").value;
                     //console.log(rating,count)
                     count++
                     tonef = rfreqs[count];
@@ -241,7 +260,7 @@ $.when( $.ready ).then(() => {
                         $("#up").remove();
                         $("#finish").remove();
                         $("#ratingSlider").remove();
-
+                        submitExperimentResults();
                     } else {
                         playSound();
                         setTimeout(() => {
@@ -290,7 +309,40 @@ function shuffle(array,ratingcount) {
     [array[i], array[j]] = [array[j], array[i]];
     [ratingcount[i], ratingcount[j]] = [ratingcount[j], ratingcount[i]];
   }
-  return array
+  //return array
+}
+
+const submitExperimentResults = () => {
+    const myData = {
+        participantId: pid
+    }
+    for (let i = 0; i < frequencies.length; i++) {
+        myData['frequencies'+i] = frequencies[i];
+    }
+    for (let i = 0; i < amp.length; i++) {
+        myData['amp'+i] = amp[i];
+    }
+    for (let i = 0; i < frequenciesbracket.length; i++) {
+        myData['frequenciesbracket'+i] = frequenciesbracket[i];
+    }
+    myData['tinnitusPitchMatch'] = tinnitusPitchMatch;
+    for (let i = 0; i < rfreqs.length; i++) {
+        myData['rfreqs'+i] = rfreqs[i];
+    }
+    for (let i = 0; i < rating.length; i++) {
+        myData['rating'+i] =rating[i];
+    }
+    $.ajax({
+        type: 'POST',
+        url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/complete/',
+        dataType: 'json',
+        data: myData
+    }).done(() => {
+        console.log('DATA SAVED');
+    }).fail((err) => {
+        console.error('Data not saved', err);
+        $("#startingInstr").html("<li id='Instructions'>OPPS - something went completely wrong saving your experiment data.</li>");
+    });
 }
 
 

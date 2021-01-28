@@ -15,4 +15,5 @@ tinnitus_bracket.psyexp
 tinnitus_bracket.py
 tinnitus_bracket_lastrun.py
 .idea
-
+.aws-sam
+packaged.yaml

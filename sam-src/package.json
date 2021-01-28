@@ -1,0 +1,19 @@
+{
+  "name": "tinnitus_test_backend",
+  "version": "1.0.0",
+  "description": "The backend for the tinnitus test experiment",
+  "main": "start.js",
+  "repository": "git@github.com:jjlentz/TinnitusTest.git",
+  "author": "Jennifer Lentz",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "fast-csv": "^4.3.5"
+  },
+  "scripts": {
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
+  }
+}
