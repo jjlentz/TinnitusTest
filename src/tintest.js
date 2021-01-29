@@ -1,5 +1,6 @@
 const tonedur = 2; //duration of the tones to be played
-var count = 0; 
+var count = 0;  //general counter
+var butcount = 0;  //counter for buttons in pitch comparison task
 var expcount = 0; //case 0 = calibration; case 1 = level matching; case 2 = pitch bracket; case 3 = pitch rating
 var tonef = 0; 
 var ampForPlayFunction;
@@ -8,6 +9,13 @@ var frequencies = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000
 var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 2000, 4000, 3000]; 
 var rfreqs = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 
     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+var bracketcount = [0, 10, 1, 9, 2, 8, 3, 7, 4, 6, 5];  //counter for shuffled frequencies
+
+// var frequencies = [250, 500, 750, 1000];
+// var frequenciesbracket = [250, 1000, 500, 750]; 
+// var bracketcount = [0, 3, 1, 2];  //counter for shuffled frequencies
+// var rfreqs = [250, 500, 750, 1000, 250, 500, 750, 1000, 250, 500, 750, 1000]
+//These are here for debugging only
 
 var step;
 var amp = []; 
@@ -22,7 +30,6 @@ for (step = 0; step < rfreqs.length; step++) {
   rating.push(0);
 };
 shuffle(rfreqs,ratingcount); //shuffled frequencies and counter for rating
-var bracketcount = [0, 8, 1, 7, 2, 6, 3, 5, 4];  //counter for shuffled frequencies
 
 let butpressHigh = 0; 
 let butpressLow = 0;
@@ -115,9 +122,11 @@ $.when( $.ready ).then(() => {
                 case 2:   
                     butpressLow++; butpressHigh = 0; count++
                     tonef = frequenciesbracket[count];
+                    //console.log(count,tonef,butpressLow)
                     if ((count === 1) && (butpressLow === 1)){
                         butpressLow = 2;
                     }
+
                     break;
             };
 
@@ -134,15 +143,16 @@ $.when( $.ready ).then(() => {
                 case 2 :
                     butpressHigh++; butpressLow = 0; count++
                     tonef = frequenciesbracket[count];
-                    if ((count === 2) && (butpressHigh === 1)){
-                        butpressHigh = 2;
-                    }
+                    // if ((count === 2) && (butpressHigh === 1)){
+                    //     butpressHigh = 2;
+                    // }
+                    // console.log("answer louder")
                     break;
             };
            // console.log(amp[count])
 
         };   
-        //console.log(expcount,butpressHigh,butpressLow,count)
+        // console.log(expcount,butpressHigh,butpressLow,count,amp[bracketcount[count]])
         if ((expcount != 3) && ((butpressHigh === 2) || (butpressLow === 2) ||
             (count == frequenciesbracket.length))){
             $("#instruct").html('Instructions: Break');
@@ -167,15 +177,16 @@ $.when( $.ready ).then(() => {
         };
         //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
 
-        if (amp[count] >= 1){
-            $("#startingInstr").html("<li id='Instructions'>You have reached the maximum sound level. </li>\
-            <li>Press <strong> Done </strong> to hear the next sound. </li>");
-            $("#ansButtons button").prop('disabled', true);
-            $("#ansButtons button").css({'opacity': '.1'});
-            //console.log('testing')
-            count++;
-        };
-             
+        if (expcount === 1){
+            if (amp[count] >= 1){
+                $("#startingInstr").html("<li id='Instructions'>You have reached the maximum sound level. </li>\
+                <li>Press <strong> Done </strong> to hear the next sound. </li>");
+                $("#ansButtons button").prop('disabled', true);
+                $("#ansButtons button").css({'opacity': '.1'});
+                // console.log('testing')
+                //count++;
+            }; 
+        };     
     });
 
     $("#finish").click(() => {
@@ -284,6 +295,7 @@ function playSound() {
         $("#soundIndicator").show();
         $("#soundIndicator").css({'opacity': '1'}); // Turning on the button while playing
 
+        // console.log(count,tonef,ampForPlayFunction)
         var sound = new Howl({
              src: ['wave' + tonef + '.wav'],
              html5: true // Force to HTML5 so that the audio can stream in (best for large files).
@@ -294,9 +306,9 @@ function playSound() {
 
         setTimeout(() => {
             $("#finish").prop('disabled', false);
-            if (ampForPlayFunction < 1) {
+            //if (ampForPlayFunction < 1) {
                 $("#ansButtons button").prop('disabled', false);
-            } 
+            //} 
             $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
         }, tonedur * 1000);
 
@@ -339,6 +351,7 @@ const submitExperimentResults = () => {
         data: myData
     }).done(() => {
         console.log('DATA SAVED');
+        //console.log(myData)
     }).fail((err) => {
         console.error('Data not saved', err);
         $("#startingInstr").html("<li id='Instructions'>OPPS - something went completely wrong saving your experiment data.</li>");
