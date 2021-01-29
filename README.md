@@ -1,6 +1,7 @@
 # TinnitusTest
 
-Jenny - please add a short description
+This is a test to measure tinnitus perception (loudness and pitch).  
+Loudness is measured with level matching.  Pitch is measured using bracketing and a rating method.  
 
 The application uses several AWS resources, including Lambda functions and an API Gateway API. 
 These resources are defined in the `template.yaml` file in this project.
