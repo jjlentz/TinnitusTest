@@ -38,7 +38,7 @@ After deploying the backend to the AWS cloud, use the output to update tintest.j
 Finally, copy experiment resources to their respective buckets.
 ```bash
 cd src
-aws s3 cp .  s3://<experiment-bucket> -recursive --profile <your_profile>
+aws s3 cp .  s3://<experiment-bucket> --recursive --profile <your_profile>
 cd ../resources
 aws s3 cp results.csv s3://<experiment-results-bucket>/results.csv --profile <your_profile>
 cd ???
