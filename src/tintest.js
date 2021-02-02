@@ -35,6 +35,7 @@ let butpressHigh = 0;
 let butpressLow = 0;
 let pid = '';
 let tinnitusPitchMatch = 0
+let startTime = 0;
 
 $.when( $.ready ).then(() => {
     $('#participantForm').submit((event) => {
@@ -46,7 +47,8 @@ $.when( $.ready ).then(() => {
             dataType: 'json',
             data: {participantId: pid, browser: navigator.userAgent}
         })
-        .done(() => {
+        .done((response) => {
+            startTime = response.startTime;
             $('#participantForm').hide();
             $('#experimentRow').show();
         })
@@ -326,7 +328,8 @@ function shuffle(array,ratingcount) {
 
 const submitExperimentResults = () => {
     const myData = {
-        participantId: pid
+        participantId: pid,
+        startTime
     }
     for (let i = 0; i < frequencies.length; i++) {
         myData['frequencies'+i] = frequencies[i];

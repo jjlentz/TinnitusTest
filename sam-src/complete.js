@@ -25,7 +25,7 @@ const appendDataToCSV = async (data, s3, bucket) => {
                 reject(error);
             })
             .on('data', row => {
-                if (row.participantId === data.participantId) {
+                if (row.participantId === data.participantId && row.start === data.startTime) {
                     const matchRow = {
                         ...row,
                         ...data

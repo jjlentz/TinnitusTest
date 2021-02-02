@@ -48,6 +48,7 @@ const saveStartTime = async (newRow, s3, bucket) => {
     await s3.putObject(params).promise();
     newRow['start'] = dateString;
     await appendCsv(newRow, s3, bucket);
+    return dateString;
 }
 
 exports.lambdaHandler = async (event, context) => {
@@ -59,7 +60,7 @@ exports.lambdaHandler = async (event, context) => {
     const s3 = new AWS.S3();
     const index = await common.findParticipantIndex(id, s3, bucket);
     if (index > -1) {
-        await saveStartTime(data, s3, bucket);
+        const startTime = await saveStartTime(data, s3, bucket);
         return {
             'statusCode': 200,
             headers: {
@@ -67,7 +68,7 @@ exports.lambdaHandler = async (event, context) => {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
             },
-            'body': JSON.stringify({status: 'OK'})
+            'body': JSON.stringify({status: 'OK', startTime: startTime})
         }
     }
     return {
