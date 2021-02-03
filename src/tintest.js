@@ -56,6 +56,14 @@ $.when( $.ready ).then(() => {
             $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
         });
     });
+    $("#test").click(() => {
+        ampForPlayFunction = 0.5;
+        tonef = 3000;
+        // console.log("testing")
+        playSound();
+
+    });
+
     $("#startId").click(() => {
         $("#ansButtons button").prop('disabled', false);
         $("#ansButtons button").css({'opacity': '1','cursor': 'pointer' });
@@ -111,7 +119,8 @@ $.when( $.ready ).then(() => {
             };
     });
 
-    $("button.answer").click((event) => {
+ 
+    $("button.answer").click(() => {
         //$("button.answer").prop('disabled', true);
         const ansSofter = event.target.id === "down" ? true : false;
         const ansLouder = event.target.id === "up" ? true : false;
@@ -164,6 +173,7 @@ $.when( $.ready ).then(() => {
             $("#ansButtons button").css({'opacity': '.1'});
             $("#startId").prop('disabled', false);
             $("#startId").css({'opacity': '1'});
+
             expcount++
             count = 0;
 
@@ -193,14 +203,17 @@ $.when( $.ready ).then(() => {
 
     $("#finish").click(() => {
         //console.log("finish",expcount)
-        switch (expcount) {
+ 
+            switch (expcount) {
             
             case 0:
+                $("#test").prop('disabled', true);
+                $("#test").css({'opacity': '0'});
                 $("#instruct").html('Instructions: Level Matching');
                 $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play a sound. </li>\
-                <li>If your tinnitus is softer than the sound or you can't hear the sound, click the \
+                <li>If your tinnitus is softer than the sound, click the \
                     <strong> softer </strong> button. </li>\
-                <li>If your tinnitus is louder than the sound, click the <strong> louder </strong> button.</li>\
+                <li>If your tinnitus is louder than the sound or you can't hear the sound, click the <strong> louder </strong> button.</li>\
                 <li style='color:firebrick'><strong>Do this until your find a sound that has the same (or very close) \
                     loudness as your tinnitus.</strong></li>\
                 <li>Then, click the <strong> Done </strong> button to play the next sound and do this again.</li><br>\
@@ -221,7 +234,8 @@ $.when( $.ready ).then(() => {
                     if (count === (frequencies.length - 1)) {
                         $("#instruct").html('Instructions: Break');
                         $("#startingInstr").html("<li id='Instructions'>Thank you!  The levels have been set! </li>\
-                        <li>Here, if your tinnitus pitch is higher than the sound, press the <strong> higher </strong> button. </li>\
+                        <li>The next phase is a pitch matching experiement. </li> \
+                        <li>If your tinnitus pitch is higher than the sound, press the <strong> higher </strong> button. </li>\
                         <li>If your tinnitus pitch is lower than the sound, press the <strong> lower </strong> button.</li>\
                         <li>Take a short break, and push start when you are ready to do the pitch matching phase of the study. </li>");
 
@@ -231,6 +245,8 @@ $.when( $.ready ).then(() => {
                         $("#startId").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
                         $("#finish").prop('disabled', true);
                         $("#finish").css({'opacity': '0'});
+                        $("#down").html('tinnitus is lower'); $("#up").html('tinnitus is higher');  
+
                         expcount++; count = 0;  
                         
                     } else {

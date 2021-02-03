@@ -23,11 +23,13 @@
     </form>
     <div id="experimentRow" class="row" style="display: none">
         <div class="column instructions">
-            <h2 id="instruct" class=dkblue>Instructions</h2>
+            <h2 id="instruct" class=dkblue>Instructions: Setting up the study</h2>
             <ul id="startingInstr" class="bigText">
-                <li style ="color:firebrick"><strong> Set the volume on your computer to maximum. </strong></li>
-                <li> After you set the volume, click the <strong> Done </strong> button. </li>
-                <li> Don't worry - we won't play sounds that are so loud as to hurt your ears. </li>
+                <li style ="color:firebrick"><strong> Set the volume on your computer to about 25%. </strong></li>
+                <li> After you set the volume, click the <strong> Test </strong> button to play a test sound. </li>
+                <li> If the sound is distorted or so loud it hurts your ears, decrease the volume on your computer. </li>
+                <li> If the sound is softer than a loud conversation, increase the volume on your computer. </li>
+                <li> Complete this process until you find a level that is moderately loud, or the volume setting is at 100%. Then, click the <strong> Done </strong> button. </li>
             </ul>
         </div>
         <div class="experiment">
@@ -43,6 +45,9 @@
             </div>
             <div id="finishButton">
                 <button id="finish" class="small green">Done</button><br>
+            </div>
+            <div id="testButton">
+                <button id="test" class="small mt">Test</button><br>
             </div>
             <div class="slidecontainer" style="display: none" id="ratingSlider">
                 <label>

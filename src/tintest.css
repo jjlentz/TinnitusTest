@@ -3,6 +3,7 @@ div, header {text-align:center}
 .blue {background-color:blue}
 .green {background-color:green}
 .dkblue {color:darkblue;}
+.mt {background-color:mediumturquoise;}
 .bigText {
   font-size:1.2em;
   text-align: left;
