@@ -1,7 +1,7 @@
 const tonedur = 2; //duration of the tones to be played
 var count = 0;  //general counter
 var butcount = 0;  //counter for buttons in pitch comparison task
-var expcount = 0; //case 0 = calibration; case 1 = level matching; case 2 = pitch bracket; case 3 = pitch rating
+var expcount = "calibrate"; 
 var tonef = 0; 
 var ampForPlayFunction;
 
@@ -10,6 +10,7 @@ var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 2000, 400
 var rfreqs = [250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 
     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
 var bracketcount = [0, 10, 1, 9, 2, 8, 3, 7, 4, 6, 5];  //counter for shuffled frequencies
+
 
 // var frequencies = [250, 500, 750, 1000];
 // var frequenciesbracket = [250, 1000, 500, 750]; 
@@ -61,6 +62,9 @@ $.when( $.ready ).then(() => {
         tonef = 3000;
         // console.log("testing")
         playSound();
+        $("#finish").prop('disabled', false);
+        $("#finish").css({'opacity': '1','cursor': 'pointer' });
+        const anstest = event.target.id === "down" ? true : false;
 
     });
 
@@ -71,7 +75,7 @@ $.when( $.ready ).then(() => {
         $("#startId").css({'opacity': '.1'});
   
         switch (expcount) {
-            case 2:  //Pitch measurement - single frequency
+            case "pitch_bracket1":  //Pitch measurement - single frequency
                 $("#startId").prop('disabled', true);
                 $("#startId").css({'opacity': '.1'});
                 $("#instruct").html('Instructions: Pitch Comparison');
@@ -84,7 +88,21 @@ $.when( $.ready ).then(() => {
                 tonef = frequenciesbracket[0];
             break;
 
-            case 3:  // Pitch rating part of the experiment
+            case "pitch_bracket2":  //Pitch measurement - using audio bracketing procedure
+                $("#startId").prop('disabled', true);
+                $("#startId").css({'opacity': '.1'});
+                $("#instruct").html('Instructions: Pitch Comparison Phase 2');
+                $("#startingInstr").html("<p id='Instructions'>This is another method to measure the pitch\
+                    of your tinnitus. <br>\
+                You will hear two sounds. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+                Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></p>");
+                $("#down").html('lower (1st) sound'); $("#up").html('higher (2nd) sound');  
+                //$("#startId").html('Playing');  //help!
+              //  tonef = frequenciesbracket[0];
+            break;
+
+
+            case "pitch_rating":  // Pitch rating part of the experiment
                 $("#instruct").html('Instructions: Pitch Rating');
                 $("#startingInstr").html("<li id='Instructions'>Here, we are trying to measure the pitch\
                     of your tinnitus using a different procedure.</li>\
@@ -102,15 +120,15 @@ $.when( $.ready ).then(() => {
 
         }; 
 
-            if (expcount != 3){
+            if (expcount != "pitch_rating"){
                 //console.log(count,amp[count]);
-                if (expcount === 2){
+                if (expcount === "pitch_bracket1"){
                     ampForPlayFunction = amp[bracketcount[count]];
                 } else {
                     ampForPlayFunction = amp[count];
                 };
                 playSound();
-                if (expcount === 1){
+                if (expcount === "level_set"){
                      $("#finish").css({'opacity': '1','cursor': 'pointer'});
                 };
                 setTimeout(() => {
@@ -126,11 +144,11 @@ $.when( $.ready ).then(() => {
         const ansLouder = event.target.id === "up" ? true : false;
         if (ansSofter) {
             switch (expcount) {
-                case 1:
+                case "level_set":
                     amp[count] = 0.56 * amp[count]; // if true, make sound 5 dB louder. 
                     tonef = frequencies[count];
                     break;
-                case 2:   
+                case "pitch_bracket1":   
                     butpressLow++; butpressHigh = 0; count++
                     tonef = frequenciesbracket[count];
                     //console.log(count,tonef,butpressLow)
@@ -144,14 +162,14 @@ $.when( $.ready ).then(() => {
         };  
         if (ansLouder) {
             switch (expcount) {
-                case 1 :
+                case "level_set":
                     amp[count] = 1.78 * amp[count]; // if true, make sound 5 dB softer.  
                     if (amp[count] > 1) {
                         amp[count] = 1;
                     }
                     tonef = frequencies[count];
                     break;
-                case 2 :
+                case "pitch_bracket1":
                     butpressHigh++; butpressLow = 0; count++
                     tonef = frequenciesbracket[count];
                     // if ((count === 2) && (butpressHigh === 1)){
@@ -164,7 +182,7 @@ $.when( $.ready ).then(() => {
 
         };   
         // console.log(expcount,butpressHigh,butpressLow,count,amp[bracketcount[count]])
-        if ((expcount != 3) && ((butpressHigh === 2) || (butpressLow === 2) ||
+        if ((expcount != "pitch_rating") && ((butpressHigh === 2) || (butpressLow === 2) ||
             (count == frequenciesbracket.length))){
             $("#instruct").html('Instructions: Break');
             $("#startingInstr").html("<li id='Instructions'>Thank you! </li>\
@@ -174,13 +192,14 @@ $.when( $.ready ).then(() => {
             $("#startId").prop('disabled', false);
             $("#startId").css({'opacity': '1'});
 
-            expcount++
+            //expcount++
+            expcount = "pitch_rating"
             count = 0;
 
         } else {
-            if (expcount === 3){
+            if (expcount === "pitch_rating"){
                 ampForPlayFunction = amp[ratingcount[count]];
-            } else if (expcount === 2) {
+            } else if (expcount === "pitch_bracket1") {
                 ampForPlayFunction = amp[bracketcount[count]];
             } else {
                 ampForPlayFunction = amp[count];
@@ -189,10 +208,10 @@ $.when( $.ready ).then(() => {
         };
         //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
 
-        if (expcount === 1){
+        if (expcount === "level_set"){
             if (amp[count] >= 1){
-                $("#startingInstr").html("<li id='Instructions'>You have reached the maximum sound level. </li>\
-                <li>Press <strong> Done </strong> to hear the next sound. </li>");
+                $("#startingInstr").html("<li id='Instructions'>Press <strong> Done </strong> to hear the next sound. </li>");
+               //<li>Press <strong> Done </strong> to hear the next sound. </li>");
                 $("#ansButtons button").prop('disabled', true);
                 $("#ansButtons button").css({'opacity': '.1'});
                 // console.log('testing')
@@ -206,9 +225,8 @@ $.when( $.ready ).then(() => {
  
             switch (expcount) {
             
-            case 0:
-                $("#test").prop('disabled', true);
-                $("#test").css({'opacity': '0'});
+            case "calibrate":
+            $("#test").remove();
                 $("#instruct").html('Instructions: Level Matching');
                 $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play a sound. </li>\
                 <li>If your tinnitus is softer than the sound, click the \
@@ -225,11 +243,12 @@ $.when( $.ready ).then(() => {
                 $("#startId").css({'opacity': '1','cursor': 'pointer' });
 
                 tonef = frequencies[0];
-                expcount++;
+                //expcount++;
+                expcount = "level_set"
 
             break;
 
-            case 1: //This is the level matching section
+            case "level_set": //This is the level matching section
                 //if (confirm("Confirm your response")){
                     if (count === (frequencies.length - 1)) {
                         $("#instruct").html('Instructions: Break');
@@ -247,7 +266,9 @@ $.when( $.ready ).then(() => {
                         $("#finish").css({'opacity': '0'});
                         $("#down").html('tinnitus is lower'); $("#up").html('tinnitus is higher');  
 
-                        expcount++; count = 0;  
+                        //expcount++; 
+                        expcount = "pitch_bracket1"
+                        count = 0;  
                         
                     } else {
                         $("#instruct").html('Instructions: Level Matching');
@@ -276,7 +297,7 @@ $.when( $.ready ).then(() => {
                     };
                 //};
             break;
-            case 3:  //This is the rating section
+            case "pitch_rating":  //This is the rating section
                 //if (confirm("Confirm your response")){
                     rating[count] = document.getElementById("rangeSlider").value;
                     //console.log(rating,count)
