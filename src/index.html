@@ -7,7 +7,6 @@
     <script src="jquery-3.5.1.js"></script>
     <script src="howler.core.js"></script>
     <script src="tintest.js"></script>
-    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 </head>
 <body>
 <header>
@@ -36,9 +35,13 @@
             <div id="controls">
                 <button id="startId" class="small green butoff" disabled="true">Start</button>
             </div>
-            <div id="soundIndicator" style="display: none">
+<!--             <div id="soundIndicator" style="display: none">
                 <i class='fas fa-circle blink' style='font-size:3em;color:darkorange'></i>
             </div>
+ -->            
+            
+            <div id="soundIndicator" class="circle" style="opacity: 0"></div>
+
             <div id="ansButtons">
                 <button id="down" class="blue big answer butoff" disabled="true">tinnitus is softer</button>
                 <button id="up" class="blue answer butoff" disabled="true">tinnitus is louder</button><br>
