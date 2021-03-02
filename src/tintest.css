@@ -50,7 +50,7 @@ p {margin:.3em}
 }
 
 .blink {
-     animation: blinker 0.2s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+     animation: blinker 2s cubic-bezier(.5, 0, 1, 1) 0.2s 1 alternate;
 }
  @keyframes blinker {
      from {
@@ -60,6 +60,17 @@ p {margin:.3em}
          opacity: 0;
     }
 }
+
+ .circle {
+      border-radius: 50%;
+      background-color: darkorange;
+      width: 3.25em;
+      height: 3.25em;
+      /*position: absolute;*/
+      opacity: 1;
+      margin: auto;
+      text-align: center;
+ }
 
 .slidecontainer {
   width: 60%; /* Width of the outside container */

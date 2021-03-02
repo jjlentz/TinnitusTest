@@ -7,7 +7,6 @@
     <script src="jquery-3.5.1.js"></script>
     <script src="howler.core.js"></script>
     <script src="tintest.js"></script>
-    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 </head>
 <body>
 <header>
@@ -15,14 +14,46 @@
 </header>
 <div>
     <form id="participantForm">
-        <label>
-            Participant ID
+        <label>Enter your Participant ID
             <input type="text" id="participantId" maxlength="256" size="36" required placeholder="<your participant id>"/>
-        </label>
+        </label><br><br>
+<!-- <form action="/action_page.php">
+ -->  
+         <label for="earphone">Select the closest earphone type to the ones you are wearing</label><br>
+          <select name="earphone" id="earphone">
+            <option value="earphoneBlank"> </option>
+            <option value="insertOpen">Earphones that go in your ear but don't seal (like earbuds)</option>
+            <option value="insertClosed">Earphones that go in your ear and seal off the ear canal (like skull candy) </option>
+            <option value="overEar">Earphones that cover your ears (like Beats) </option>
+            <option value="computer">The computer speakers</option>
+          </select><br><br>
+
+          <label for="earphoneDescrip">If you know your earphone brand or model, enter that here </label>
+          <input type="earphoneDescrip" id="earDesc" name="earDesc"><br><br>
+  
+        <label for="tinnitusEar">In which ear is your tinnitus strongest?</label><br>
+            <select name="tinnitusEar" id="tinnitusEar">
+            <option value="Blank"> </option>
+            <option value="Right">Right ear</option>
+            <option value="Left">Left ear</option>
+            <option value="Both">Equal in both ears</option>
+            </select><br><br>  
+
+        <label for="tinnitusType">Which category best describes your tinnitus?</label><br>
+            <select name="tinnitusType" id="tinnitusType">
+            <option value="typeBlank"></option>
+            <option value="Noisy">Noisy: like static or electrical noise</option>
+            <option value="Tonal">Tonal: like ringing, bells, or whistles</option>
+            <option value="Pulse">Pulsing: like clicking or pulsing</option>
+            <option value="Roar">Roaring: like ocean waves</option>
+            </select><br><br>  
+
         <button type="submit">Submit</button>
     </form>
-    <div id="experimentRow" class="row" style="display: none">
-        <div class="column instructions">
+
+        <div id="experimentRow" class="row">
+    <!-- style="display: none">
+     -->    <div class="column instructions">
             <h2 id="instruct" class=dkblue>Instructions: Setting up the study</h2>
             <ul id="startingInstr" class="bigText">
                 <li style ="color:firebrick"><strong> Set the volume on your computer to about 25%. </strong></li>
@@ -36,18 +67,22 @@
             <div id="controls">
                 <button id="startId" class="small green butoff" disabled="true">Start</button>
             </div>
-            <div id="soundIndicator" style="display: none">
+<!--             <div id="soundIndicator" style="display: none">
                 <i class='fas fa-circle blink' style='font-size:3em;color:darkorange'></i>
             </div>
+ -->            
+            
+            <div id="soundIndicator" class="circle" style="opacity: 0"></div>
+
             <div id="ansButtons">
                 <button id="down" class="blue big answer butoff" disabled="true">tinnitus is softer</button>
                 <button id="up" class="blue answer butoff" disabled="true">tinnitus is louder</button><br>
             </div>
-            <div id="finishButton">
-                <button id="finish" class="small green">Done</button><br>
-            </div>
             <div id="testButton">
                 <button id="test" class="small mt">Test</button><br>
+            </div>
+            <div id="finishButton">
+                <button id="finish" class="small green butoff" disabled="true">Done</button><br>
             </div>
             <div class="slidecontainer" style="display: none" id="ratingSlider">
                 <label>
