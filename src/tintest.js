@@ -1,8 +1,7 @@
 const tonedur = 2; //duration of the tones to be played
 var count = 0;  //general counter
 var butcount = 0;  //counter for buttons in pitch comparison task
-// var expcount = 'calibrate';
-var expcount = "pitch_bracket2";
+var expcount = 'calibrate';
 var tonef = 0; 
 var ampForPlayFunction;
 var pitchMatch2 = 0;
@@ -61,7 +60,7 @@ let butpressLow = 0;
 let pid = '';
 let tinnitusPitchMatch = 0
 let startTime = 0;
-const Frequency_MATCHER = /(\d+)\-[A-E]/;
+const Frequency_MATCHER = /(\d+)\-[A-F]/;
 const waitPlayHigh = async (highTone, highAmp) => {
 
     await new Promise(r => setTimeout(r,3000))
