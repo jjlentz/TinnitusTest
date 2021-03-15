@@ -44,7 +44,7 @@ bracketMap.set('8000-E', {low: '6000-F', high: '8000-F'});
 var step;
 var amp = []; 
 for (step = 0; step < frequencies.length; step++) {
-  amp.push(0.5);
+  amp.push(0.005);
 };
 //amp=[0.4, 0.1, 0.001];
 var ratingcount = [];
@@ -144,7 +144,7 @@ $.when( $.ready ).then(() => {
         } else {
             soundEar = "S";
         };
-    
+    // console.log('here')
         $.ajax({
             type: 'POST',
             url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
@@ -160,10 +160,23 @@ $.when( $.ready ).then(() => {
             $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
         });
     });
-    $("#test").click(() => {
-        ampForPlayFunction = 0.5;
+    $("button.test").click(() => {
+        const calibrateMid = event.target.id === "testMid" ? true : false;
+        const calibrateLow = event.target.id === "testLow" ? true : false;
+        const calibrateHigh = event.target.id === "testHigh" ? true : false;
+        ampForPlayFunction = 0.005;
+
+        if (calibrateMid){ 
+            tonef = 3000;
+        } else if (calibrateLow) {
+            tonef = 500;
+        } else (calibrateHigh) {
+            tonef = 8000;
+        };
+
+
         tonef = 3000;
-        // console.log("testing")
+        console.log("testing")
         playSound();
         $("#finish").prop('disabled', false);
         $("#finish").css({'opacity': '1','cursor': 'pointer' });
