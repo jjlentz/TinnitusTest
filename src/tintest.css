@@ -24,6 +24,12 @@ button.big {padding-right:.35em; padding-left:.35em; margin-right:2em; }
     padding: 0.4em;
     border-radius: .3em; border-color:gray; margin: .5em;
 }
+#tinnitusRating button {
+    font-size: 1em;
+    color:green;
+    padding: 0.4em;
+    border-radius: .3em; border-color:gray; margin: .5em;
+}
 
 p {margin:.3em}
 .butoff{
