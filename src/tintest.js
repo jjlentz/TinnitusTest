@@ -305,7 +305,7 @@ $.when( $.ready ).then(() => {
             playSound();
             $('#tinnitusRating').submit((event) => {
                 event.preventDefault();
-                tinRat = $('#tinnitusRating').val();
+                tinRat = $('#tinnitusRatingField').val();
                 $("#up").remove();
                 submitExperimentResults();
                 $("#instruct").html('Thank you.  You are done!');
