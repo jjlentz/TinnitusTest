@@ -2,7 +2,7 @@ const tonedur = 2; //duration of the tones to be played
 var count = 0;  //general counter
 var butcount = 0;  //counter for buttons in pitch comparison task
 var expcount = 'calibrate';
-// var expcount = 'pitchbracket2';
+//var expcount = 'pitchbracket2';
 
 var tonef = 0; 
 var ampForPlayFunction;
@@ -563,7 +563,8 @@ $.when( $.ready ).then(() => {
                         $("#instruct").html('Instructions: Final Step');
                         $("#startingInstr").css({'text-align': 'center'});
                         $("#startingInstr").html("<h3 id='Instructions'>Push the Play button \
-                            and rate the similarity of that sound to your tinnitus.<br></h3>");
+                            and use the dropdown menu to rate the similarity of that sound to your tinnitus. \
+                            Push the Submit button to complete the experiment. <br></h3>");
                         $('#tinnitusRating').show();
                         $("#ratingSlider").remove();
                         $("#finish").remove();
