@@ -32,7 +32,7 @@
   
         <label for="tinnitusEar">In which ear is your tinnitus strongest?</label><br>
         <select name="tinnitusEar" id="tinnitusEar">
-            <option value="Blank"> </option>
+            <option value="EarBlank"> </option>
             <option value="Right">Right ear</option>
             <option value="Left">Left ear</option>
             <option value="Both">Equal in both ears</option>
@@ -49,7 +49,7 @@
 
         <label for="hearingLoss">Do you have hearing loss?</label><br>
         <select name="hearingLoss" id="hearingLoss">
-            <option value="typeBlank"></option>
+            <option value="HLBlank"></option>
             <option value="HL">Yes</option>
             <option value="NH">No</option>
             <option value="UN">Unsure</option>
@@ -58,9 +58,8 @@
         <button type="submit">Submit</button>
     </form>
 
-    <div id="experimentRow" class="row" style="display: none">>
-        <!--  style="display: none"> -->
-        <div class="column instructions">
+    <div id="experimentRow" class="row" style="display: none">
+       <div class="column instructions">
             <h2 id="instruct" class=dkblue>Instructions: Setting up the study</h2>
             <ul id="startingInstr" class="bigText">
                 <li style ="color:firebrick"><strong> Set the volume on your computer to about 25%. </strong></li>
@@ -79,8 +78,8 @@
             </ul>
             <div>
                 <form id="tinnitusRating" style="display: none" >
-                    <label>Rate the similarity of the final sound to your tinnitus
-                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0" required placeholder="0"/><br>
+                  <label>Rate the similarity of the final sound to your tinnitus
+                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0" required placeholder=""/><br>
                     </label>
                     <label for="tinnitusRatingField">Use a number between 0 and 10. </label><br>
                     <label> 0 = not at all similar to your tinnitus. 10 = identical </label>

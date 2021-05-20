@@ -12,6 +12,7 @@ var pitch2ResultS;
 var pitch2Result;
 var twoSounds = false;
 var soundEar;
+var tinType; 
 var calPass;
 
 var frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
@@ -599,11 +600,19 @@ function playSound() {
         }, 250);
 
         // console.log(count,tonef,ampForPlayFunction)
-        const sound = new Howl({
-             src: [soundEar + 'wav' + tonef + '.wav'],
+        
+        if (tinType === "Noisy"){
+            filesnd = [soundEar + 'Noise'];
+        } else {
+            filesnd = [soundEar];
+        };
+        console.log(tinType,filesnd)
+    
+            const sound = new Howl({
+             src: [filesnd + 'wav' + tonef + '.wav'],
              html5: true // Force to HTML5 so that the audio can stream in (best for large files).
             });
-
+    
         //console.log(sound)
         Howler.volume(ampForPlayFunction)
         sound.play();
