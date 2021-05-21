@@ -690,7 +690,7 @@ const submitExperimentResults = () => {
     myData['tinnitusType'] = tinType;
     myData['hearigLoss'] = HL;
     for (let i = 0; i < frequencies.length; i++) {
-        myData['CalFrea'+i] = frequencies[i];
+        myData['CalFreq'+i] = frequencies[i];
     }
     for (let i = 0; i < ampInit.length; i++) {
         myData['CalAmp'+i] = ampInit[i];
