@@ -1,5 +1,5 @@
 %maketinsnoise.m
-cfreq=[250 500 1000 1500 2000 3000 4000 5000 6000 7000 8000];
+cfreq=[750];
 fs=44100; NyFs=44100/2;
 t=1/fs:1/fs:1.8;
 noise=randn(1,fs*1.8);
@@ -17,9 +17,9 @@ for ii=1:length(cfreq)
     y=filter(b,a,noise);
     yamp=0.95./max(y);
     y=yamp*fullramp.*y;
-    yL=[zeros(1,length(y))' y'];
+    yL=[y' y' ];
     
-    expr=['audiowrite(''' 'RNoisewav' num2str(cfreq(ii)) '.wav' ''',yL,44100)']
+    expr=['audiowrite(''' 'SNoisewav' num2str(cfreq(ii)) '.wav' ''',yL,44100)']
     eval(expr)
 end
 
