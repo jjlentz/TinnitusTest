@@ -18,7 +18,7 @@
             <input type="text" id="participantId" maxlength="256" size="36" required placeholder="<your participant id>"/>
         </label><br><br>
         
-        <label for="earphone">Select the closest earphone type to the ones you are wearing</label><br>
+        <label for="earphone">Select the closest <color:firebrick> earphone type to the ones you are wearing</label><br>
         <select name="earphone" id="earphone">
             <option value="earphoneBlank"> </option>
             <option value="insertOpen">Earphones that go in your ear but don't seal (like earbuds)</option>
@@ -104,6 +104,8 @@
                 <button id="testMid" class="small mt test butoff">Test2</button>
                 <button id="testLow" class="small mt test butoff">Test3</button>
             </div>
+            <div id="levelAtMax" class="midText" style="opacity: 0"><strong>Level At Maximum!<br>
+                Push Done to Continue<strong></div>
             <div id="finishButton">
                 <button id="finish" class="small green butoff" disabled="true">Done</button><br>
             </div>

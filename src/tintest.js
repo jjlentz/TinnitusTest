@@ -126,7 +126,8 @@ const handlePitchUpdate = (event) => {
             <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
             <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
             <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
-            <li>Push <strong> Start </strong> when you are ready. <li><br>\
+            <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
+            <li>Push <strong> Start </strong> when you are ready. </li><br>\
             <li>Note: there are a total of 36 sounds in this section of the experiment.</li>");      
             $('#finish').prop('disabled',true).css({'opacity': '.1'});
         
@@ -198,7 +199,8 @@ $.when( $.ready ).then(() => {
         } else if (calibrateHigh){
             tonef = 8000;
             calPass = 11;
-             ampForPlayFunction = ampInit[calPass];
+            $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+            ampForPlayFunction = ampInit[calPass];
       
         };
 
@@ -419,10 +421,12 @@ $.when( $.ready ).then(() => {
         };
         //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
 
-        if (expcount === "level_set" || "calibrate"){
-            if (ampInit[count] >= 1 || ampInit[calPass] >= 1){
-                $("#startingInstr").html("<li id='Instructions'>Press <strong> Done </strong> to move on. </li>");
-               //<li>Press <strong> Done </strong> to hear the next sound. </li>");
+        if (expcount === ("level_set" || "calibrate")){
+            //console.log(expcount)
+            if (ampInit[count] >= 1){
+                $("#startingInstr").html("<li id='Instructions'>Press <strong> Done </strong> to move on.</li>");
+                $("#levelAtMax").css({'opacity': '1'});
+                //console.log(count,calPass,ampInit)
                 $("#ansButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
                 $("#testButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
                 // console.log('testing')
@@ -435,6 +439,7 @@ $.when( $.ready ).then(() => {
     $("#finish").click(() => {
         //console.log("finish",expcount)
  
+            $("#levelAtMax").css({'opacity': '0'});
             switch (expcount) {
 
             case "calibrate":
@@ -521,10 +526,12 @@ $.when( $.ready ).then(() => {
                 //if (confirm("Confirm your response")){
                     if (count === (frequencies.length - 1)) {
                         $("#instruct").html('Instructions: Break');
+                        $("startingInstr").css("color", "black")
                         $("#startingInstr").html("<li id='Instructions'>Thank you!  The levels have been set! </li>\
                         <li>The next phase is a pitch matching experiment. </li> \
                         <li>If your tinnitus pitch is higher than the sound, press the <strong> higher </strong> button. </li>\
                         <li>If your tinnitus pitch is lower than the sound, press the <strong> lower </strong> button.</li>\
+                        <li>If you cannot hear the sound, press the <strong> lower </strong> button.</li>\
                         <li>Take a short break, and push start when you are ready to do the pitch matching phase of the study. </li>");
 
                         $("#ansButtons button").prop('disabled', true);
@@ -543,6 +550,7 @@ $.when( $.ready ).then(() => {
                         
                     } else {
                         $("#instruct").html('Instructions: Level Matching');
+                        $("startingInstr").css("color", "black")
                         $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play a sound. </li>\
                         <li>If your tinnitus is softer than the sound, click the \
                             <strong> softer </strong> button. </li>\
@@ -577,7 +585,8 @@ $.when( $.ready ).then(() => {
                     $("#startingInstr").html("<p id='Instructions'>This is another method to measure the pitch\
                     of your tinnitus. <br>\
                 You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
-                Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></p>");
+                Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br>\
+                If you can't hear either sound, click <strong>lower</strong><br></p>");
                     $("#down").html('lower (1st) sound'); $("#up").html('higher (2nd) sound');
                     //$("#startId").html('Playing');  //help!
                     //  tonef = frequenciesbracket[0];
@@ -688,7 +697,7 @@ const submitExperimentResults = () => {
     myData['earPhone'] = earPhoneType;
     myData['tinnitusEar'] = tinEar;
     myData['tinnitusType'] = tinType;
-    myData['hearigLoss'] = HL;
+    myData['hearingLoss'] = HL;
     for (let i = 0; i < frequencies.length; i++) {
         myData['CalFreq'+i] = frequencies[i];
     }
