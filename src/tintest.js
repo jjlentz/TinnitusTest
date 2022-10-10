@@ -7,7 +7,9 @@ var expcount = 'calibrate';
 var tonef = 0; 
 var ampForPlayFunction;
 var amp = [];
+var pitchMatch1 = 0;
 var pitchMatch2 = 0;
+var pitchMatch3 = 0;
 var myClassesResult;
 var pitch2ResultS;
 var pitch2Result;
@@ -16,12 +18,14 @@ var soundEar;
 var tinType; 
 var calPass;
 
-var frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 
-    3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+
+var frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+// , 250, 500, 750, 1000, 1500, 2000, 
+//     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
 var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 1500, 4000, 2000, 3000]; 
-var rfreqs = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 
-    3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
-// var rfreqs = [250, 1000, 3000, 7000];
+// var rfreqs = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 
+//     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+ var rfreqs = [250, 1000, 3000, 7000];
 var bracketcount = [0, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];  //counter for shuffled frequencies
 //mapconst mapindex=[0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12];  //Need for amplitude values for bracket2 procedure
 
@@ -46,14 +50,14 @@ var step;
 var ampInit = []; 
 for (step = 0; step < frequencies.length; step++) {
   ampInit[step] = 0.005;
-};
+}
 //amp=[0.4, 0.1, 0.001];
 var ratingcount = [];
 let rating = [];
 for (step = 0; step < rfreqs.length; step++) {
   ratingcount.push(step % (rfreqs.length / 3)); //put back after testing!
   rating.push(0);
-};
+}
 shuffle(rfreqs,ratingcount); //shuffled frequencies and counter for rating
 
 let butpressHigh = 0; 
@@ -83,11 +87,12 @@ const handlePitchUpdate = (event) => {
     const myClassesup = $('#up').attr('class').split(/\s+/);
     const pitchClassup = myClassesup.find(c => Frequency_MATCHER.test(c));
     const nextfreq = bracketMap.get(pitchClass); 
-    // console.log(nextfreq)
+    console.log(nextfreq)
     // console.log('test')
     
+    console.log('handlePitchUpdate')
     if (nextfreq) {
-        // console.log(nextfreq)
+        
         // console.log('test')
         var nextclasslow = nextfreq.low; 
         var toneftemplow = nextclasslow.match(/\d+/);
@@ -105,32 +110,59 @@ const handlePitchUpdate = (event) => {
         waitPlayHigh(tonefhigh,amp[frequencies.indexOf(tonefhigh)]);
         $('#down').removeClass(pitchClassdown).addClass(nextfreq.low);
         $('#up').removeClass(pitchClassup).addClass(nextfreq.high);
-    } else {
-            //$("#finish").prop('disabled', false); // Turning on the button while playing
-            //("#ansButtons button").prop('disabled', false); // Turning on the button while playing
-            //$("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
-            // console.log(nextfreq)
-            // console.log('test2')
- 
-            $('#down').prop('disabled',true).css({'opacity': '.1'});
-            $('#up').prop('disabled',true).css({'opacity': '.1'});  
-            $('#startId').prop('disabled',false).css({'opacity': '1','pointer': 'cursor'});
-            // console.log('test3')
-        //     $('#experimentRow').show();
+        console.log('handlePitchUpdate: if (nextfreq)')
 
-            expcount = 'pitch_rating';      
-
-            $("#instruct").html('Instructions: Pitch Rating');
-            $("#startingInstr").html("<li id='Instructions'>In this last phase of the experiment, we will measure\
-                the pitch of your tinnitus using a different procedure.</li>\
-            <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
-            <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
-            <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
-            <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
-            <li>Push <strong> Start </strong> when you are ready. </li><br>\
-            <li>Note: there are a total of 36 sounds in this section of the experiment.</li>");      
-            $('#finish').prop('disabled',true).css({'opacity': '.1'});
+   // *** NEED TO FIX CODE BELOW
+    } else if (expcount === 'pitch_bracket1' ) {
+        expcount = 'pitch_bracket2'; 
+        $('#startId').prop('disabled',false).css({'opacity': '1','pointer': 'cursor'});
+        $("#instruct").html('Instructions: Pitch Comparison (Repeat time)');
+        $("#startingInstr").html("<p id='Instructions'>Push the start button to do this procedure again.");
         
+        myClassesResult = $('#' + event.target.id).attr('class').split(/\s+/);
+        pitch1ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
+        // console.log(pitch2ResultS);
+        pitch1Result = pitch1ResultS.match(/\d+/);
+        pitchMatch1 = pitch1Result[0];
+        console.log(pitchMatch1)
+
+        $('#down').removeClass(pitchClassdown).addClass('1000-A');
+        $('#up').removeClass(pitchClassup).addClass('2000-A');
+        console.log('handlePitchUpdate: if (pitchbracket1)')
+  
+    } else if (expcount === 'pitch_bracket2' ) {
+        expcount = 'pitch_bracket3'; 
+        $('#startId').prop('disabled',false).css({'opacity': '1','pointer': 'cursor'});
+        $("#instruct").html('Instructions: Pitch Comparison (Repeat time)');
+        $("#startingInstr").html("<p id='Instructions'>Push the start button to do this procedure again.");
+        myClassesResult = $('#' + event.target.id).attr('class').split(/\s+/);
+        pitch2ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
+        pitch2Result = pitch2ResultS.match(/\d+/);
+        pitchMatch2 = pitch2Result[0];
+        console.log(pitchMatch1)
+        console.log('handlePitchUpdate: if (pitchbracket2)')
+        $('#down').removeClass(pitchClassdown).addClass('1000-A');
+        $('#up').removeClass(pitchClassup).addClass('2000-A');
+
+    } else {
+
+        $('#down').prop('disabled',true).css({'opacity': '.1'});
+        $('#up').prop('disabled',true).css({'opacity': '.1'});
+        $('#startId').prop('disabled',false).css({'opacity': '1','pointer': 'cursor'});
+
+        expcount = 'pitch_rating';
+
+        $("#instruct").html('Instructions: Pitch Rating');
+        $("#startingInstr").html("<li id='Instructions'>In this last phase of the experiment, we will measure\
+            the pitch of your tinnitus using a different procedure.</li>\
+        <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
+        <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
+        <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
+        <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
+        <li>Push <strong> Start </strong> when you are ready. </li><br>\
+        <li>Note: there are a total of 36 sounds in this section of the experiment.</li>");
+        $('#finish').prop('disabled',true).css({'opacity': '.1'});
+        console.log('handlePitchUpdate: pitchrating')
     };
 };
 
@@ -174,29 +206,29 @@ $.when( $.ready ).then(() => {
         });
     });
     $("button.test").click(() => {
-        const calibrateMid = event.target.id === "testMid" ? true : false;
-        const calibrateLow = event.target.id === "testLow" ? true : false;
-        const calibrateHigh = event.target.id === "testHigh" ? true : false;
+        const calibrateMid = event.target.id === "testMid";
+        const calibrateLow = event.target.id === "testLow";
+        const calibrateHigh = event.target.id === "testHigh";
         // ampForPlayFunction = 0.005;
 
         // $("#ansButtons button").prop('disabled', false).css({'opacity': '1','cursor': 'pointer' });
         // $("#ansButtons button").prop('disabled', false).css({'opacity': '1','cursor': 'pointer' });
 
 
-        if (calibrateMid){ 
+        if (calibrateMid) {
             tonef = 3000; 
             calPass = 6;
             ampForPlayFunction = ampInit[calPass];
             $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});   
             // $("#testMid").prop('disabled', true).css({'opacity': '1','cursor': 'pointer' });
 
-        } else if (calibrateLow){
+        } else if (calibrateLow) {
             tonef = 500; 
             calPass = 1;
             $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
             ampForPlayFunction = ampInit[calPass];
  
-        } else if (calibrateHigh){
+        } else if (calibrateHigh) {
             tonef = 8000;
             calPass = 11;
             $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
@@ -221,28 +253,58 @@ $.when( $.ready ).then(() => {
   
         switch (expcount) {
             case "pitch_bracket1":  //Pitch measurement - single frequency
-                $("#startId").prop('disabled', true);
-                $("#startId").css({'opacity': '.1'});
-                $("#instruct").html('Instructions: Pitch Comparison');
-                $("#startingInstr").html("<p id='Instructions'>Here, we are trying to measure the pitch\
-                    of your tinnitus. <br>\
-                Press <strong>lower</strong> if your tinnitus is lower than the sound. <br>\
-                Press <strong>higher</strong> if your tinnitus is higher than the sound. <br></p>");
-                $("#down").html('tinnitus is lower'); 
-                $("#up").html('tinnitus is higher');  
-                //$("#startId").html('Playing');  //help!
-                tonef = frequenciesbracket[0];
-            break;
+                // $("#startId").prop('disabled', true);
+                // $("#startId").css({'opacity': '.1'});
+                // $("#instruct").html('Instructions: Pitch Comparison');
+                // $("#startingInstr").html("<p id='Instructions'>Here, we are trying to measure the pitch\
+                //     of your tinnitus. <br>\
+                // Press <strong>lower</strong> if your tinnitus is lower than the sound. <br>\
+                // Press <strong>higher</strong> if your tinnitus is higher than the sound. <br></p>");
+                // $("#down").html('tinnitus is lower'); 
+                // $("#up").html('tinnitus is higher');  
+                // //$("#startId").html('Playing');  //help!
+                // tonef = frequenciesbracket[0];
+            // break;
 
             case "pitch_bracket2":  //Pitch measurement - using audio bracketing procedure
+             //    $("#startId").prop('disabled', true);
+             //    $("#startId").css({'opacity': '.1'});
+             //    $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
+             //    // $("#ansButtons button").css({'opacity': '1','cursor': 'pointer' });     
+             //    $("#instruct").html('Instructions: Pitch Comparison Phase 2');
+             //    $("#startingInstr").html("<p id='Instructions'>This is another method to measure the pitch\
+             //        of your tinnitus. You will do this method three times. <br>\
+             //    You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+             //    Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></p>");
+             //    $("#down").html('lower (1st) sound').addClass('1000-A'); 
+             //    $("#up").html('higher (2nd) sound').addClass('2000-A');  
+                
+             //    tonef = 1000; 
+             //    ampForPlayFunction = amp[frequencies.indexOf(tonef)];
+             //    twoSounds = true;
+             //    $("#ansButtons button").prop('disabled', true);
+             //    // $("#ansButtons button").css({'opacity': '.1'});
+             //    playSound();
+             //    setTimeout(() => {
+             //        //$("#finish").prop('disabled', false);
+             //        //if (ampForPlayFunction < 1) {
+             //            $("#ansButtons button").prop('disabled', false).css({'cursor': 'pointer'});
+             //        //$("#ansButtons button").css({'opacity': '1', 'cursor': 'pointer'});
+             //        //} 
+             //        //$("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
+             //        }, tonedur * 2600);
+             //   waitPlayHigh(2000,amp[frequencies.indexOf(2000)]);   //Plays second sound at 2000 Hz to start. 
+ 
+             // break;
+
+           case "pitch_bracket3":  //Pitch measurement - using audio bracketing procedure
                 $("#startId").prop('disabled', true);
                 $("#startId").css({'opacity': '.1'});
                 $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
                 // $("#ansButtons button").css({'opacity': '1','cursor': 'pointer' });     
-                $("#instruct").html('Instructions: Pitch Comparison Phase 2');
-                $("#startingInstr").html("<p id='Instructions'>This is another method to measure the pitch\
-                    of your tinnitus. <br>\
-                You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+                $("#instruct").html('Instructions: Pitch Comparison');
+                $("#startingInstr").html("<p id='Instructions'>In this measurement of your tinnitus pitch, <br>\
+                you will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
                 Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></p>");
                 $("#down").html('lower (1st) sound').addClass('1000-A'); 
                 $("#up").html('higher (2nd) sound').addClass('2000-A');  
@@ -261,10 +323,9 @@ $.when( $.ready ).then(() => {
                     //} 
                     //$("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
                     }, tonedur * 2600);
-               waitPlayHigh(2000,amp[frequencies.indexOf(2000)]);   //Plays second sound at 2000 Hz to start. 
- 
-             break;
-
+                waitPlayHigh(2000,amp[frequencies.indexOf(2000)]);   //Plays second sound at 2000 Hz to start.
+                console.log('In big switch case with pitch_bracket3')
+                break;
 
             case "pitch_rating":  // Pitch rating part of the experiment
                 $("#instruct").html('Instructions: Pitch Rating');
@@ -280,23 +341,28 @@ $.when( $.ready ).then(() => {
                 $("#ratingSlider").show();
                 $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
                 tonef = rfreqs[count];
-             break;
+                console.log('in swith case pitch rating')
+                break;
 
-        }; 
+            default:
+                console.log(`In expcount switch statement with unexpected value of ${expcount}`);
+                break;
+        }
 
             if (expcount != "pitch_rating"){
                 //console.log(count,amp[count]);
-                if (expcount === "pitch_bracket1"){
-                    ampForPlayFunction = amp[bracketcount[count]];
-                } else {
+                // if (expcount === "pitch_bracket1"){
+                //     ampForPlayFunction = amp[bracketcount[count]];
+                // } else {
                     ampForPlayFunction = amp[count];
-                };
+                // };
                 if (expcount === "level_set"){
                      $("#finish").css({'opacity': '1','cursor': 'pointer'});
                     ampForPlayFunction = ampInit[count];
 
                 };
                 playSound();
+                console.log('after sswitch case')
             };
         // console.log("level set 287")
     });
@@ -319,9 +385,47 @@ $.when( $.ready ).then(() => {
                 $("#startingInstr").remove();
                 $('#tinnitusRating').remove();
             });
-        };
+            console.log('Expcount finish')
+        }
 
-        if (expcount === 'pitch_bracket2') {
+        if (expcount === 'pitch_bracket1') {
+            twoSounds = true;
+            $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
+            //$("#ansButtons button").css({'opacity': '.1'});
+            
+            handlePitchUpdate(event);
+             //console.log(event);
+            // myClassesResult = $('#' + event.target.id).attr('class').split(/\s+/);
+            // pitch1ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
+            // // console.log(pitch2ResultS);
+            // pitch1Result = pitch1ResultS.match(/\d+/);
+            // pitchMatch1 = pitch1Result[0];
+            console.log(pitchMatch1)
+            setTimeout(() => {
+                $("#ansButtons button").prop('disabled', false).css({'cursor': 'pointer'});
+            }, tonedur * 2600);
+            console.log('Expcount finish bracket 1')
+
+        } else if (expcount === 'pitch_bracket2') {
+            twoSounds = true;
+            $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
+            //$("#ansButtons button").css({'opacity': '.1'});
+            
+            handlePitchUpdate(event);
+             //console.log(event);
+            // myClassesResult = $('#' + event.target.id).attr('class').split(/\s+/);
+            // pitch2ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
+            // // console.log(pitch2ResultS);
+            // pitch2Result = pitch2ResultS.match(/\d+/);
+            // pitchMatch2 = pitch2Result[0];
+            // console.log(pitchMatch2)
+            setTimeout(() => {
+                $("#ansButtons button").prop('disabled', false).css({'cursor': 'pointer'});
+            }, tonedur * 2600);
+            console.log('Expcount finish bracket 2')
+
+        } else if (expcount === 'pitch_bracket3') {
+
             twoSounds = true;
             $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
             //$("#ansButtons button").css({'opacity': '.1'});
@@ -329,110 +433,111 @@ $.when( $.ready ).then(() => {
             handlePitchUpdate(event);
              //console.log(event);
             myClassesResult = $('#' + event.target.id).attr('class').split(/\s+/);
-            pitch2ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
+            pitch3ResultS = myClassesResult.find(c => Frequency_MATCHER.test(c));
             // console.log(pitch2ResultS);
-            pitch2Result = pitch2ResultS.match(/\d+/);
-            pitchMatch2 = pitch2Result[0];
+            pitch3Result = pitch3ResultS.match(/\d+/);
+            pitchMatch3 = pitch3Result[0];
+            console.log(pitchMatch3)
             setTimeout(() => {
                 $("#ansButtons button").prop('disabled', false).css({'cursor': 'pointer'});
             }, tonedur * 2600);
-
+            console.log('Expcount finish bracked 3');
         } else {
-       twoSounds = false;
-        const ansSofter = event.target.id === "down" ? true : false;
-        const ansLouder = event.target.id === "up" ? true : false;
-        if (ansSofter) {
-            switch (expcount) {
-                case "calibrate":
-                    ampInit[calPass] = 0.56 * ampInit[calPass]; // if true, make sound 5 dB louder.
-                    break;
-                case "level_set":
-                    ampInit[count] = 0.56 * ampInit[count]; // if true, make sound 5 dB louder.
-                    tonef = frequencies[count];
-                    break;
-                case "pitch_bracket1":
-                    butpressLow++; butpressHigh = 0; count++
-                    tonef = frequenciesbracket[count];
-                    //console.log(count,tonef,butpressLow)
-                    if ((count === 1) && (butpressLow === 1)){
-                        butpressLow = 2;
-                    }
+            twoSounds = false;
+            const ansSofter = event.target.id === "down";
+            const ansLouder = event.target.id === "up";
+            if (ansSofter) {
+                switch (expcount) {
+                    case "calibrate":
+                        ampInit[calPass] = 0.56 * ampInit[calPass]; // if true, make sound 5 dB louder.
+                        break;
+                    case "level_set":
+                        ampInit[count] = 0.56 * ampInit[count]; // if true, make sound 5 dB louder.
+                        tonef = frequencies[count];
+                        break;
+                    // case "pitch_bracket1":
+                    //     butpressLow++; butpressHigh = 0; count++
+                    //     tonef = frequenciesbracket[count];
+                    //     //console.log(count,tonef,butpressLow)
+                    //     if ((count === 1) && (butpressLow === 1)){
+                    //         butpressLow = 2;
+                    //     }
 
-                    break;
-            };
+                    //     break;
+                }
 
-        };
-        if (ansLouder) {
-            switch (expcount) {
-               case "calibrate":
-                    ampInit[calPass] = 1.78 * ampInit[calPass]; // if true, make sound 5 dB softer.
-                    if (ampInit[calPass] > 1) {
-                        ampInit[calPass] = 1;
-                    }
-                    break;
-                case "level_set":
-                    ampInit[count] = 1.78 * ampInit[count]; // if true, make sound 5 dB softer.
-                    if (ampInit[count] > 1) {
-                        ampInit[count] = 1;
-                    }
-                    tonef = frequencies[count];
-                    break;
-                case "pitch_bracket1":
-                    butpressHigh++; butpressLow = 0; count++
-                    tonef = frequenciesbracket[count];
-                    break;
+            }
+            if (ansLouder) {
+                switch (expcount) {
+                   case "calibrate":
+                        ampInit[calPass] = 1.78 * ampInit[calPass]; // if true, make sound 5 dB softer.
+                        if (ampInit[calPass] > 1) {
+                            ampInit[calPass] = 1;
+                        }
+                        break;
+                    case "level_set":
+                        ampInit[count] = 1.78 * ampInit[count]; // if true, make sound 5 dB softer.
+                        if (ampInit[count] > 1) {
+                            ampInit[count] = 1;
+                        }
+                        tonef = frequencies[count];
+                        break;
+                    // case "pitch_bracket1":
+                    //     butpressHigh++; butpressLow = 0; count++
+                    //     tonef = frequenciesbracket[count];
+                    //     break;
 
-            };
-           // console.log(amp[count])
+                }
+               // console.log(amp[count])
 
-        };
-        // console.log(expcount,butpressHigh,butpressLow,count,amp[bracketcount[count]])
-        if ((expcount == "pitch_bracket1") && ((butpressHigh === 2) || (butpressLow === 2) ||
-            (count == frequenciesbracket.length))){
-            $("#instruct").html('Instructions: Break');
-            $("#startingInstr").html("<li id='Instructions'>Thank you! </li>\
-            <li>Take a short break, and push start to do another pitch matching study. </li>\
-            <li>You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
-                Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></li>");
+            }
+            // console.log(expcount,butpressHigh,butpressLow,count,amp[bracketcount[count]])
+            if ((expcount == "pitch_bracket1") && ((butpressHigh === 2) || (butpressLow === 2) ||
+                (count == frequenciesbracket.length))){
+                $("#instruct").html('Instructions: Break');
+                $("#startingInstr").html("<li id='Instructions'>Thank you! </li>\
+                <li>Take a short break, and push start to do another pitch matching study. </li>\
+                <li>You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+                    Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></li>");
 
-            $("#ansButtons button").prop('disabled', true);
-            $("#ansButtons button").css({'opacity': '.1'});
-            $("#startId").prop('disabled', false);
-            $("#startId").css({'opacity': '1'});
+                $("#ansButtons button").prop('disabled', true);
+                $("#ansButtons button").css({'opacity': '.1'});
+                $("#startId").prop('disabled', false);
+                $("#startId").css({'opacity': '1'});
 
-            //expcount++
-            expcount = "pitch_bracket2"
-            count = 0;
+                //expcount++
+                expcount = "pitch_bracket2"
+                count = 0;
 
-        } else {
-            if (expcount === "pitch_rating"){
-                ampForPlayFunction = amp[ratingcount[count]];
-            } else if (expcount === "pitch_bracket1") {
-                ampForPlayFunction = amp[bracketcount[count]];
-            } else if (expcount === "calibrate") {
-                ampForPlayFunction = ampInit[calPass]; 
-            } else if (expcount === "level_set"){
-                ampForPlayFunction = ampInit[count]; 
             } else {
-                ampForPlayFunction = amp[count];
-            };
-            playSound();
+                if (expcount === "pitch_rating"){
+                    ampForPlayFunction = amp[ratingcount[count]];
+                // } else if (expcount === "pitch_bracket1") {
+                //     ampForPlayFunction = amp[bracketcount[count]];
+                } else if (expcount === "calibrate") {
+                    ampForPlayFunction = ampInit[calPass];
+                } else if (expcount === "level_set"){
+                    ampForPlayFunction = ampInit[count];
+                } else {
+                    ampForPlayFunction = amp[count];
+                }
+                playSound();
 
-        };
-        //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
+            }
+            //console.log(expcount, count, amp[count], butpressHigh, butpressLow)
 
-        if (expcount === ("level_set" || "calibrate")){
-            //console.log(expcount)
-            if (ampInit[count] >= 1){
-                $("#startingInstr").html("<li id='Instructions'>Press <strong> Done </strong> to move on.</li>");
-                $("#levelAtMax").css({'opacity': '1'});
-                //console.log(count,calPass,ampInit)
-                $("#ansButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
-                $("#testButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
-                // console.log('testing')
-                //count++;
-            };
-        };
+            if (expcount === ("level_set" || "calibrate")){
+                //console.log(expcount)
+                if (ampInit[count] >= 1){
+                    $("#startingInstr").html("<li id='Instructions'>Press <strong> Done </strong> to move on.</li>");
+                    $("#levelAtMax").css({'opacity': '1'});
+                    //console.log(count,calPass,ampInit)
+                    $("#ansButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+                    $("#testButtons button").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+                    // console.log('testing')
+                    //count++;
+                }
+            }
         }
     });
 
@@ -465,39 +570,39 @@ $.when( $.ready ).then(() => {
                     for (step = 0; step < 4; step++) {
                         const ampLev = ampInit[1];
                         ampInit[step] = ampLev;
-                    };
+                    }
                     for (step = 4; step < 8; step++) {
                         const ampLev = ampInit[6];
                         ampInit[step] = ampLev;
-                     };
+                     }
                     for (step = 9; step < 12; step++) {
                         const ampLev = ampInit[11];
                         ampInit[step] = ampLev;
-                    };
+                    }
                     for (step = 12; step < 16; step++) {
                         const ampLev = ampInit[1];
                         ampInit[step] = ampLev;
-                    };
+                    }
                     for (step = 16; step < 20; step++) {
                         const ampLev = ampInit[6];
                         ampInit[step] = ampLev;
-                     };
+                     }
                     for (step = 20; step < 24; step++) {
                         const ampLev = ampInit[11];
                         ampInit[step] = ampLev;
-                    };
+                    }
                     for (step = 24; step < 28; step++) {
                         const ampLev = ampInit[1];
                         ampInit[step] = ampLev;
-                    };
+                    }
                     for (step = 28; step < 32; step++) {
                         const ampLev = ampInit[6];
                         ampInit[step] = ampLev;
-                     };
+                     }
                     for (step = 32; step < 36; step++) {
                         const ampLev = ampInit[11];
                         ampInit[step] = ampLev;
-                    };
+                    }
 
                     $("#instruct").html('Instructions: Level Matching');
                     $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play a sound. </li>\
@@ -519,8 +624,8 @@ $.when( $.ready ).then(() => {
                     expcount = "level_set"
                     // expcount = "pitch_rating"
                     // console.log("level set 467")
-                };
-            break;
+                }
+                break;
 
             case "level_set": //This is the level matching section
                 //if (confirm("Confirm your response")){
@@ -529,10 +634,8 @@ $.when( $.ready ).then(() => {
                         $("startingInstr").css("color", "black")
                         $("#startingInstr").html("<li id='Instructions'>Thank you!  The levels have been set! </li>\
                         <li>The next phase is a pitch matching experiment. </li> \
-                        <li>If your tinnitus pitch is higher than the sound, press the <strong> higher </strong> button. </li>\
-                        <li>If your tinnitus pitch is lower than the sound, press the <strong> lower </strong> button.</li>\
-                        <li>If you cannot hear the sound, press the <strong> lower </strong> button.</li>\
-                        <li>Take a short break, and push start when you are ready to do the pitch matching phase of the study. </li>");
+                        <li>You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+                        Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></li>");
 
                         $("#ansButtons button").prop('disabled', true);
                         $("#ansButtons button").css({'opacity': '.1'});
@@ -544,7 +647,7 @@ $.when( $.ready ).then(() => {
 
                         for (step = 0; step < (frequencies.length / 3); step++) {
                           amp[step] = (ampInit[step] + ampInit[step + 12] + ampInit[step + 24]) / 3;
-                        };
+                        }
                         expcount = "pitch_bracket1"
                         count = 0;  
                         
@@ -573,9 +676,9 @@ $.when( $.ready ).then(() => {
                             $("#soundIndicator").css({'opacity': '0'}); // Turning on the button while playing
                             //console.log('test case')
                         }, tonedur * 1000);
-                    };
+                    }
                 //};
-            break;
+                break;
             case "pitch_bracket2":  //Pitch measurement - using audio bracketing procedure
                     $("#startId").prop('disabled', false).css({'opacity': '1','cursor': 'pointer' });
                     $("#finish").prop('disabled', true);
@@ -592,8 +695,25 @@ $.when( $.ready ).then(() => {
                     //  tonef = frequenciesbracket[0];
                     $('#down').css({'opacity': '1'}).prop('disabled', false).addClass('1000-A');
                     $('#up').css({'opacity': '1'}).prop('disabled', false).addClass('2000-A');
-            break;
+                break;
 
+            case "pitch_bracket3":  //Pitch measurement - using audio bracketing procedure
+                    $("#startId").prop('disabled', false).css({'opacity': '1','cursor': 'pointer' });
+                    $("#finish").prop('disabled', true);
+                    $("#finish").css({'opacity': '.1'});
+
+                    $("#instruct").html('Instructions: Pitch Comparison Phase 2 (Second time)');
+                    $("#startingInstr").html("<p id='Instructions'>This is the second run of the last method to measure the pitch\
+                    of your tinnitus. <br>\
+                You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
+                Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br>\
+                If you can't hear either sound, click <strong>lower</strong><br></p>");
+                    $("#down").html('lower (1st) sound'); $("#up").html('higher (2nd) sound');
+                    //$("#startId").html('Playing');  //help!
+                    //  tonef = frequenciesbracket[0];
+                    $('#down').css({'opacity': '1'}).prop('disabled', false).addClass('1000-A');
+                    $('#up').css({'opacity': '1'}).prop('disabled', false).addClass('2000-A');
+                break;
             case "pitch_rating":  //This is the rating section
                 //if (confirm("Confirm your response")){
                     rating[count] = document.getElementById("rangeSlider").value;
@@ -620,9 +740,9 @@ $.when( $.ready ).then(() => {
                             $("#up").prop('disabled', false);
                             $("#soundIndicator").css({'opacity': '0'}); // Turning on the button while playing
                        }, tonedur * 1200);
-                    };
-            break;
-        };
+                    }
+                break;
+        }
         
     });
 
@@ -634,10 +754,10 @@ function playSound() {
             $("#finish").prop('disabled', true);
             $("#ansButtons button").prop('disabled', true).css({'cursor': 'not-allowed'});
             $("#startId").prop('disabled', true);
-        };
+        }
         setTimeout(() => {
             $("#soundIndicator").show();
-            $("#soundIndicator").css({'opacity': '1'}); // Turning on the button while playing
+            $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
         }, 250);
 
         // console.log(count,tonef,ampForPlayFunction)
@@ -646,7 +766,7 @@ function playSound() {
             filesnd = [soundEar + 'Noise'];
         } else {
             filesnd = [soundEar];
-        };
+        }
    
             const sound = new Howl({
              src: [filesnd + 'wav' + tonef + '.wav'],
@@ -673,11 +793,11 @@ function playSound() {
                 //     $("#ansButtons button").prop('disabled', false);
                 // //} 
                 $("#soundIndicator").css({'opacity': '0'}); // Turning off the indicator after playing
-            }, tonedur * 1200);
+            }, tonedur * 1600);
             
-        };
+        }
 
-};
+}
 
 function shuffle(array,ratingcount) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -713,8 +833,10 @@ const submitExperimentResults = () => {
     for (let i = 0; i < frequenciesbracket.length; i++) {
         myData['frequenciesbracket'+i] = frequenciesbracket[i];
     }
-    myData['tinnitusPitchMatch'] = tinnitusPitchMatch;
+    myData['tinnitusPitchMatch'] = pitchMatch1;
     myData['tinnitusPitchMatch2'] = pitchMatch2;
+    myData['tinnitusPitchMatch3'] = pitchMatch3;
+    console.log(pitchMatch1, pitchMatch2, pitchMatch3)
     myData['clinicalRating'] = tinRat;
     for (let i = 0; i < rfreqs.length; i++) {
         myData['rfreqs'+i] = rfreqs[i];
