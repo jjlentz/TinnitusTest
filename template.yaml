@@ -22,7 +22,7 @@ Resources:
       FunctionName: !Join ['-', [!Ref StackPrefix, 'complete-experiment-function']]
       CodeUri: sam-src/
       Handler: complete.lambdaHandler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       Events:
         Complete:
           Type: Api
@@ -43,7 +43,7 @@ Resources:
       FunctionName: !Join ['-', [!Ref StackPrefix, 'start-experiment-function']]
       CodeUri: sam-src/
       Handler: start.lambdaHandler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       Events:
         StartExperiment:
           Type: Api
