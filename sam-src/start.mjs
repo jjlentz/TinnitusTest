@@ -1,24 +1,31 @@
-const AWS = require('aws-sdk');
-const querystring = require('querystring');
-const csv = require('fast-csv');
-const common = require('./common');
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import querystring from 'querystring';
+import csv from 'fast-csv';
+import findParticipantIndex from "./common.mjs";
+
 
 const doWrite = async (rows, s3, params) => {
     const data = await csv.writeToString(rows);
-    const writeParams = {
+    const putCommand =  new PutObjectCommand({
         ...params,
         Body: data
-    };
-    await s3.putObject(writeParams).promise();
-}
+    });
+    const response = await s3.send(putCommand);
+    console.log(response);
+};
 
 const appendCsv = async (newRow, s3, bucket) => {
-    const resultsParams = {
+    const getObjectCommand = new GetObjectCommand({
         Bucket: bucket,
         Key: 'results.csv'
-    }
+    });
     const rows = [];
-    const readStream = s3.getObject(resultsParams).createReadStream();
+    const response = await s3.send(getObjectCommand);
+    const readStream = response.Body;
+    const putParams = {
+        Bucket: bucket,
+        Key: 'results.csv'
+    };
     return new Promise(((resolve, reject) => {
         csv.parseStream(readStream)
             .on('error', error => {
@@ -29,38 +36,39 @@ const appendCsv = async (newRow, s3, bucket) => {
             .on('end', async rowCount => {
                 console.log(`Previous row count ${rowCount - 1}`);
                 rows.push(newRow);
-                await doWrite(rows, s3, resultsParams);
+                await doWrite(rows, s3, putParams);
                 resolve();
             });
-    }))
-}
+    }));
+};
 
 const saveStartTime = async (newRow, s3, bucket) => {
     const now = new Date();
     const dateString = now.toISOString();
     let text = 'START TIME\t' + dateString
         + '\nBROWSER\t' + newRow.browser;
-    const params = {
+    const params = new PutObjectCommand({
         Body: text,
         Bucket: bucket,
         Key: newRow.participantId + '.txt'
-    }
-    await s3.putObject(params).promise();
+    });
+    const response = await s3.send(params);
+    console.log(response)
     newRow['start'] = dateString;
     await appendCsv(newRow, s3, bucket);
     return dateString;
-}
+};
 
-exports.lambdaHandler = async (event, context) => {
+export const handler = async (event) => {
     const bucket = process.env.EXPERIMENT_BUCKET;
 
     const rawBody = event.body;
     const data = querystring.parse(rawBody);
-    const id = data.participantId
-    const s3 = new AWS.S3();
-    const index = await common.findParticipantIndex(id, s3, bucket);
+    const id = data.participantId;
+    const client = new S3Client({});
+    const index = await findParticipantIndex(id, client, bucket);
     if (index > -1) {
-        const startTime = await saveStartTime(data, s3, bucket);
+        const startTime = await saveStartTime(data, client, bucket);
         return {
             'statusCode': 200,
             headers: {
@@ -69,7 +77,7 @@ exports.lambdaHandler = async (event, context) => {
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
             },
             'body': JSON.stringify({status: 'OK', startTime: startTime})
-        }
+        };
     }
     return {
         'statusCode': 401,
@@ -79,5 +87,5 @@ exports.lambdaHandler = async (event, context) => {
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
         },
         'body': JSON.stringify({status: 'NOPE'})
-    }
+    };
 };

@@ -28,7 +28,6 @@ The Serverless Application Model Command Line Interface (SAM CLI) is an extensio
  ```
 sam build -t template.yaml --use-container
 sam package --s3-bucket <bucket> --output-template-file packaged.yaml --profile <your_profile>
-sam package --s3-bucket <bucket> --output-template-file packaged.yaml --profile <your_profile>
 sam deploy --template-file packaged.yaml --stack-name <experiment_stack> --parameter-overrides StackPrefix=<prefix> --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region us-east-2 --profile <your_profile>
 ```
 

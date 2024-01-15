@@ -1,14 +1,15 @@
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 const findParticipantIndex = async (participantId, s3, bucket) => {
 
-    const getParams = {
+    const getParams = new GetObjectCommand({
         Bucket: bucket,
         Key: 'participants.txt'
-    }
+    });
     const participantIds = [];
     let index = -1;
     try {
-        const file = await s3.getObject(getParams).promise();
-        const text = file.Body.toString('ascii');
+        const response = await s3.send(getParams);
+        const text = await response.Body.transformToString();
         const lines = text.split('\n');
         lines.forEach(l => participantIds.push(l));
         // console.log(`Total Participants: ${participantIds.length}`);
@@ -18,6 +19,6 @@ const findParticipantIndex = async (participantId, s3, bucket) => {
         console.log(err);
     }
     return index;
-}
+};
 
-exports.findParticipantIndex = findParticipantIndex
+export default findParticipantIndex

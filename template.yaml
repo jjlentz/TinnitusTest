@@ -22,7 +22,7 @@ Resources:
       FunctionName: !Join ['-', [!Ref StackPrefix, 'complete-experiment-function']]
       CodeUri: sam-src/
       Handler: complete.lambdaHandler
-      Runtime: nodejs16.x
+      Runtime: nodejs20.x
       Events:
         Complete:
           Type: Api
@@ -42,8 +42,8 @@ Resources:
       Description: 'Confirm the participantId and record the experiment start'
       FunctionName: !Join ['-', [!Ref StackPrefix, 'start-experiment-function']]
       CodeUri: sam-src/
-      Handler: start.lambdaHandler
-      Runtime: nodejs16.x
+      Handler: start.handler
+      Runtime: nodejs20.x
       Events:
         StartExperiment:
           Type: Api
