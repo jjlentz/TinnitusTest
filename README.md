@@ -54,3 +54,6 @@ aws cloudfront create-invalidation --distribution-id <distribution id> --paths "
 ```
 
 Look up the distribution id in the cloudfront portion of the AWS console.
+
+## Citation
+This code may be modified for a user's specific needs, but this repository should be acknowledged in the comments of any source code and in any print or online publication.
