@@ -190,20 +190,20 @@ $.when( $.ready ).then(() => {
             soundEar = "S";
         }
 
-        $.ajax({
-            type: 'POST',
-            url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
-            dataType: 'json',
-            data: {participantId: pid, browser: navigator.userAgent}
-        })
-        .done((response) => {
-            startTime = response.startTime;
+        // $.ajax({
+        //     type: 'POST',
+        //     url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
+        //     dataType: 'json',
+        //     data: {participantId: pid, browser: navigator.userAgent}
+        // })
+        // .done((response) => {
+        //     startTime = response.startTime;
             $('#participantForm').hide();
             $('#experimentRow').show();
-        })
-        .fail(() => {
-            $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
-        });
+        // })
+        // .fail(() => {
+        //     $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
+        // });
     });
     $("button.test").click((event) => {
         const clicked = event.target.id
@@ -448,6 +448,7 @@ $.when( $.ready ).then(() => {
             twoSounds = false;
             const ansSofter = event.target.id === "down";
             const ansLouder = event.target.id === "up";
+            console.log(`ansSofter ${ansSofter} + ansLouder ${ansLouder} + expcount ${expcount}`)
             if (ansSofter) {
                 switch (expcount) {
                     case "calibrate":
@@ -544,7 +545,7 @@ $.when( $.ready ).then(() => {
     });
 
     $("#finish").click(() => {
-        //console.log("finish",expcount)
+        console.log(`finish with expcount ${expcount} and calPass ${calPass}`)
  
             $("#levelAtMax").css({'opacity': '0'});
             switch (expcount) {
@@ -676,7 +677,7 @@ $.when( $.ready ).then(() => {
                             $("#finish").prop('disabled', false); // Turning on the button while playing
                             $("#ansButtons button").prop('disabled', false); // Turning on the button while playing
                             $("#soundIndicator").css({'opacity': '0'}); // Turning on the button while playing
-                            //console.log('test case')
+                            console.log('test case')
                         }, tonedur * 1000);
                     }
                 //};
@@ -719,7 +720,7 @@ $.when( $.ready ).then(() => {
             case "pitch_rating":  //This is the rating section
                 //if (confirm("Confirm your response")){
                     rating[count] = document.getElementById("rangeSlider").value;
-                    //console.log(rating,count)
+                    console.log(rating,count)
                     count++
                     tonef = rfreqs[count];
                     ampForPlayFunction = amp[ratingcount[count]];
@@ -762,7 +763,7 @@ function playSound() {
             $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
         }, 250);
 
-        // console.log(count,tonef,ampForPlayFunction)
+        console.log(count,tonef,ampForPlayFunction)
         
         if (tinType === "Noisy"){
             filesnd = [soundEar + 'Noise'];
@@ -775,7 +776,7 @@ function playSound() {
              html5: true // Force to HTML5 so that the audio can stream in (best for large files).
             });
     
-        //console.log(sound)
+        console.log(sound)
         Howler.volume(ampForPlayFunction)
         sound.play();
         //wait();
@@ -855,7 +856,7 @@ const submitExperimentResults = () => {
         data: myData
     }).done(() => {
         console.log('DATA SAVED');
-        //console.log(myData)
+        console.log(myData)
     }).fail((err) => {
         console.error('Data not saved', err);
         $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");

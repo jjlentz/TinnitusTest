@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <title>Tinnitus Testing</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <script src="jquery-3.7.1.js"></script>
+    <script src="howler-2.2.4.js"></script>
+    <script src="tinnitusTest.js"></script>
+    <style>
+        .circle {
+            border-radius: 50%;
+            background-color: darkorange;
+            width: 3.25em;
+            height: 3.25em;
+            /*position: absolute;*/
+            opacity: 1;
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<header class="container">
+    <h1 id="mainHeader" class="title is-1">Tinnitus Testing</h1>
+</header>
+<main style="margin-top: 30px">
+    <section id="participation" class="container">
+        <form id="participantForm">
+            <div class="field">
+                <label class="label" for="participantId">Enter your Participant ID</label>
+                <input type="text" id="participantId" maxlength="256" size="36" required
+                       placeholder="<your participant id>"/>
+            </div>
+            <div class="field">
+                <label class="label" for="earphone">Select the closest earphone type to the ones you are wearing</label>
+                <select name="earphone" id="earphone">
+                    <option value="earphoneBlank"></option>
+                    <option value="insertOpen">Earphones that go in your ear but don't seal (like earbuds)</option>
+                    <option value="insertClosed">Earphones that go in your ear and seal off the ear canal (like skull
+                        candy)
+                    </option>
+                    <option value="overEar">Earphones that cover your ears (like Beats)</option>
+                    <option value="computer">The computer speakers</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="label" for="earphoneDescription">If you know your earphone brand or model, enter that
+                    here</label>
+                <input type="text" id="earphoneDescription" name="earDesc">
+            </div>
+            <div class="field">
+                <label class="label" for="tinnitusEar">In which ear is your tinnitus strongest?</label>
+                <select name="tinnitusEar" id="tinnitusEar">
+                    <option value="EarBlank"></option>
+                    <option value="Right">Right ear</option>
+                    <option value="Left">Left ear</option>
+                    <option value="Both">Equal in both ears</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="label" for="tinnitusType">Which category best describes your tinnitus?</label>
+                <select name="tinnitusType" id="tinnitusType">
+                    <option value="typeBlank"></option>
+                    <option value="Noisy">Noisy: like static or electrical noise</option>
+                    <option value="Tonal">Tonal: like ringing, bells, or whistles</option>
+                    <option value="Pulse">Pulsing: like clicking or pulsing</option>
+                    <option value="Roar">Roaring: like ocean waves</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="label" for="hearingLoss">Do you have hearing loss?</label>
+                <select name="hearingLoss" id="hearingLoss">
+                    <option value="HLBlank"></option>
+                    <option value="HL">Yes</option>
+                    <option value="NH">No</option>
+                    <option value="UN">Unsure</option>
+                </select>
+            </div>
+            <div class="field">
+                <button class="button is-link" type="submit" id="firstSubmit">Submit</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="container" id="experiment" style="display: none">
+        <div id="experimentRow" class="fixed-grid">
+            <div class="grid">
+                <div class="cell content">
+                    <h2 id="instruct" class="title is-3">Instructions: Setting up the study</h2>
+                    <ul id="startingInstr">
+                        <li style="color:firebrick; font-weight: bold">Set the volume on your computer to about 25%.
+                        </li>
+                        <li>After you set the volume, click the <strong> Test1 </strong> button to play a test sound.
+                        </li>
+                        <li>If the sound is distorted or so loud it hurts your ears, decrease the volume on your
+                            computer.
+                        </li>
+                        <li>If the sound is softer than conversation, increase the volume on your computer.</li>
+                        <li>Complete this process until the sound is moderately soft, or the volume setting is at
+                            100%.
+                        </li>
+                        <li>Then, click the <strong> Calibration Complete </strong> button.</li>
+                    </ul>
+                    <h3 id="notes" class="title is-4">Important Notes:</h3>
+                    <ul id="notesBullets">
+                        <li class="has-text-weight-semibold">Wear your earphones so that the sound plays in your ear
+                            with the weaker tinnitus.
+                        </li>
+                        <li class="has-text-weight-semibold">If you have tinnitus in both ears, listen to the sound in
+                            your right ear.
+                        </li>
+                        <li class="has-text-weight-semibold">Please do not adjust the volume on your computer again,
+                            even if you cannot hear the sounds later in the experiment.
+                        </li>
+                    </ul>
+                    <div>
+                        <form id="tinnitusRating" style="display: none">
+                            <label>Rate the similarity of the final sound to your tinnitus
+                                <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0"
+                                       required placeholder=""/><br>
+                            </label>
+                            <label for="tinnitusRatingField">Use a number between 0 and 10. </label><br>
+                            <label> 0 = not at all similar to your tinnitus. 10 = identical </label>
+                            <button type="submitTinRating">Submit Rating</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="cell experiment">
+                    <div class="fixed-grid has-4-cols">
+                        <div class="grid">
+                            <div id="controls" class="cell is-col-span-4 has-text-centered">
+                                <button id="startId" class="button is-primary" disabled="true">Start</button>
+                            </div>
+                            <div class="cell is-col-span-4 has-text-centered">
+                                <div id="soundIndicator" class="circle" style="opacity: 0"></div>
+                            </div>
+                            <div id="ansButton1" class="cell is-col-span-2 has-text-centered is-invisible">
+                                <button id="down" class="button is-link is-large answer" disabled="true">Make softer</button>
+                            </div>
+                            <div id="ansButton2" class="cell is-col-span-2 has-text-centered is-invisible">
+                                <button id="up" class="button is-link is-large answer" disabled="true">Make louder</button>
+                            </div>
+                            <div id="testButtons" class="cell is-col-span-4 has-text-centered">
+                                <button id="testHigh" class="button is-info test">Test1</button>
+                                <button id="testMid" class="button is-info test" disabled="true">Test2</button>
+                                <button id="testLow" class="button is-info test" disabled="true">Test3</button>
+                            </div>
+                            <div id="levelAtMax" class="cell is-col-span-4 has-text-centered" style="opacity: 0">
+                                <strong>Level At Maximum!<br>
+                                Push Done to Continue</strong>
+                            </div>
+                            <div id="finishButton" class="cell is-col-span-4 has-text-centered">
+                                <button id="finish" class="button is-primary testHigh" disabled="true">
+                                    Calibration Complete
+                                </button>
+                                <br>
+                            </div>
+
+
+                            <div class="slidecontainer" style="display: none" id="ratingSlider">
+                                <label>
+                                    <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
+                                    <span style="float:left; width:20%; text-align: left">Not at all similar </span>
+                                    <span style="float:left; width:20%; text-align: left"> Not very similar </span>
+                                    <span style="float:left; width:20%; text-align: center">Somewhat similar </span>
+                                    <span style="float:left; width:20%; text-align: right">Very Similar </span>
+                                    <span style="float:left; width:20%; text-align: right"> Identical </span>
+                                </label>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
