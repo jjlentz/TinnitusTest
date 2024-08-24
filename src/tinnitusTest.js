@@ -16,9 +16,29 @@ const frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 70
     250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000];
 // will be initialized later
 let ampInit = null;
+let frequencyIndex = 0;
+
+const handleLevelSetDone = (event) => {
+    console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
+    if (frequencyIndex === (frequencies.length - 1)) {
+        console.log('handle move to the next phase')
+    } else {
+        const amplitude = ampInit[++frequencyIndex]
+        const tone = frequencies[frequencyIndex]
+        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    }
+}
 
 const handleLevelSet = (event) => {
-    console.log(`handleLevelSet`)
+    const increaseVolume = event.target.id === 'up'
+    if (increaseVolume) {
+        ampInit[frequencyIndex] = 1.78 * ampInit[frequencyIndex];
+    } else {
+        ampInit[frequencyIndex] = 0.56 * ampInit[frequencyIndex];
+    }
+    const amplitude = ampInit[frequencyIndex]
+    const tone = frequencies[frequencyIndex]
+    playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
 }
 
 const handleFinishAnswer = (event) => {
@@ -45,13 +65,50 @@ const addLevelMatchingInstructions = () => {
                     <li>Note: You will see an orange circle while sound is playing.");
 }
 
+// TODO - needs a good comment on what is going on here
+const doWhatever = () => {
+    console.log('starting state of ampInit', ampInit)
+    const copy = [...ampInit]
+    for (step = 0; step < 4; step++) {
+        ampInit[step] = copy[1];
+    }
+    for (step = 4; step < 8; step++) {
+        ampInit[step] = copy[6];
+    }
+    for (step = 9; step < 12; step++) {
+        ampInit[step] = copy[11];
+    }
+    for (step = 12; step < 16; step++) {
+        ampInit[step] = copy[1];
+    }
+    for (step = 16; step < 20; step++) {
+        ampInit[step] = copy[6];
+    }
+    for (step = 20; step < 24; step++) {
+        ampInit[step] = copy[11];
+    }
+    for (step = 24; step < 28; step++) {
+        ampInit[step] = copy[1];
+    }
+    for (step = 28; step < 32; step++) {
+        ampInit[step] = copy[6];
+    }
+    for (step = 32; step < 36; step++) {
+        ampInit[step] = copy[11];
+    }
+    console.log('ending state of ampInit', ampInit)
+}
+
 const setUplevelMatching = () => {
     // remove the calibration test buttons
-    $("#testMid").remove();
-    $("#testLow").remove();
-    $("#testHigh").remove();
+    $('#testButtons>button').remove()
+    // $("#testMid").remove();
+    // $("#testLow").remove();
+    // $("#testHigh").remove();
     $("#down").html('tinnitus is softer');
     $("#up").html('tinnitus is louder');
+    $("#finish").html("Done");
+    $("#startId").prop('disabled', false);
 }
 
 const switchToTwo = () => {
@@ -75,8 +132,11 @@ const switchToThree = () => {
 }
 
 const beginLevelMatching = () => {
+    currentPhase = 'levelSet';
+    doWhatever();
     $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
     addLevelMatchingInstructions();
+    setUplevelMatching();
 }
 
 const handleBracketOneAnswer = (event) => {
@@ -91,40 +151,57 @@ const handleCalibrateAnswer = (event) => {
     } else {
         ampInit[testValues.calPass] = 0.56 * ampInit[testValues.calPass];
     }
+    const buttonId = $('#testButtons').find('button:not(:disabled)').attr('id') // TODO get id of button
+    console.log("The clicked button has id " + buttonId);
+    $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+    testValues = testSettings[buttonId]
+    const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass]
+    playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, buttonId)
+    $("#finish").prop('disabled', false);
+    $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
 
-const answerPhaseFunction = {
-    finish: handleFinishAnswer,
-    bracketOne: handleBracketOneAnswer,
-    bracketTwo: handleBracketTwoAnswer,
-    bracketThree: handleBracketThreeAnswer,
-    calibrate: handleCalibrateAnswer,
-    levelSet: handleLevelSet
+const handleCalibrateDone = () => {
+    const current = $("#testButtons button:not(:disabled)")[0];
+    console.log(`current is ${JSON.stringify(current)}`)
+    if (current.id === 'testHigh') {
+        switchToTwo();
+    } else if (current.id === 'testMid') {
+        switchToThree();
+    } else if (current.id === 'testLow') {
+        beginLevelMatching()
+    }
+    console.log(`the current is ${current.id}`, current)
 }
 
 function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     $('button').prop('disabled', true)
     // $("#finish").prop('disabled', true);
-    // $("#ansButton1 button").prop('disabled', true).css({'cursor': 'not-allowed'});
-    // $("#ansButton2 button").prop('disabled', true).css({'cursor': 'not-allowed'});
+    $("#ansButton1 button").css({'cursor': 'not-allowed'});
+    $("#ansButton2 button").css({'cursor': 'not-allowed'});
     // $("#startId").prop('disabled', true);
     setTimeout(() => {
         $("#soundIndicator").show();
         $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
     }, 250);
     const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
+    const source = `${filePrefix}wav${tone}.wav`
 
     const sound = new Howl({
-        src: [filePrefix + 'wav' + tone + '.wav'],
+        src: [source],
         html5: true // Force to HTML5 so that the audio can stream in (best for large files).
     });
 
-    console.log(`Hello from playOneSound with ${tinnitusType}:${ear}:${amplitude}:${tone}`)
-    Howler.volume(amplitude)
+    console.log(`Hello from playOneSound with src ${source} ${tinnitusType}:${ear}:${amplitude}:${tone}`)
+    if (amplitude) {
+        Howler.volume(amplitude)
+    }
     sound.play();
 
     setTimeout(() => {
-        $('#'+buttonId).prop('disabled', false);
+        if (buttonId) {
+            $('#'+buttonId).prop('disabled', false);
+        }
         $("#finish").prop('disabled', false);
         $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
         $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
@@ -137,7 +214,7 @@ const handleCalibration = (buttonId) => {
     console.log(`The clicked button has id ${buttonId}`)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testSettings[buttonId]
-    const amplitude = ampInit[testValues.calPass]
+    const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass]
     playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, buttonId)
     $("#finish").prop('disabled', false);
     $("#finish").css({'opacity': '1','cursor': 'pointer' });
@@ -196,6 +273,20 @@ const handleParticipantForm = () => {
     });
 }
 
+const answerPhaseFunction = {
+    finish: handleFinishAnswer,
+    bracketOne: handleBracketOneAnswer,
+    bracketTwo: handleBracketTwoAnswer,
+    bracketThree: handleBracketThreeAnswer,
+    calibrate: handleCalibrateAnswer,
+    levelSet: handleLevelSet
+}
+
+const donePhaseFunction = {
+    calibrate: handleCalibrateDone,
+    levelSet: handleLevelSetDone
+}
+
 $.when( $.ready ).then(() => {
     console.log("We are ready")
     handleParticipantForm();
@@ -205,15 +296,8 @@ $.when( $.ready ).then(() => {
     });
     $('#finish').click(() => {
         $("#levelAtMax").css({'opacity': '0'});
-        const current = $("#testButtons button:not(:disabled)")[0];
-        if (current.id === 'testHigh') {
-            switchToTwo();
-        } else if (current.id === 'testMid') {
-            switchToThree();
-        } else if (current.id === 'testLow') {
-            beginLevelMatching()
-        }
-        console.log(`the current is ${current.id}`, current)
+        const handler = donePhaseFunction[currentPhase]
+        handler()
     })
     $("button.answer").click((event) => {
         console.log(`Answer button clicked ${event.target.id} in phase ${currentPhase}`)
@@ -221,8 +305,13 @@ $.when( $.ready ).then(() => {
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
     })
+    $("#startId").click((event) => {
+        const handler = answerPhaseFunction[currentPhase]
+        handler(event)
+    })
 });
 
 
 
-// TODO make louder button isn't working
+// TODO during level setting could we disable done button while sound is playing?
+// really high pitch sounds are missing.
