@@ -21,7 +21,7 @@ const ratingCount = [];
 const rating = [];
 for (let step = 0; step < ratingsFrequencies.length; step++) {
     ratingCount.push(step % (ratingsFrequencies.length / 3)); //put back after testing!
-    rating.push(0);
+    rating.push(-1);
 }
 
 // will be initialized later
@@ -36,6 +36,17 @@ function shuffle(freqArray, counterArray) {
         [freqArray[i], freqArray[j]] = [freqArray[j], freqArray[i]];
         [counterArray[i], counterArray[j]] = [counterArray[j], counterArray[i]];
     }
+}
+
+const switchToFinalMatch = () => {
+    $("#instruct").html('Instructions: Final Step');
+    $("#startingInstr").css({'text-align': 'center'});
+    $("#startingInstr").html("<h3 id='Instructions'>Push the Play button \
+                            and use the dropdown menu to rate the similarity of that sound to your tinnitus. \
+                            Push the Submit button to complete the experiment.</h3>");
+    $('#tinnitusRating').show();
+    $("#ratingSlider").remove();
+    $("#finish").remove();
 }
 const handleLevelSetDone = (event) => {
     console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
@@ -62,8 +73,29 @@ const handleLevelSet = (event) => {
 }
 
 const handlePitchRating = (event) => {
-    const tone = rfreqs[frequencyIndex++]
-
+    console.log(`In handlePitchRating with event.target.id of ${event.target.id}`, event)
+    if (event.target.id === 'startId') {
+        $('#startId').hide();
+        const tone = rfreqs[frequencyIndex]
+        const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    } else if (event.target.id === 'finishButton') {
+        rating[fequencyIndex] = $('#rangeSlider').value;
+        console.log(`Recording rating of ${rating[fequencyIndex]} for index ${fequencyIndex}`);
+        if (fequencyIndex === frequencies.length) {
+             ();
+        } else {
+            fequencyIndex++;
+            const tone = rfreqs[frequencyIndex]
+            const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+            playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+        }
+    } else {
+        // just play the same thing again
+        const tone = rfreqs[frequencyIndex]
+        const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    }
 }
 
 const handleFinishAnswer = (event) => {
@@ -194,7 +226,7 @@ const switchToPitchRating = () => {
         <li>Push <strong> Start </strong> when you are ready. </li><br>\
         <li>Note: there are a total of 36 sounds in this section of the experiment.</li>");
     $('#finish').prop('disabled',true).css({'opacity': '.1'});
-    $('#startId').hide();
+    $('#startId').show();
     $('#down').hide();
     $('#up').html('Play');
     $('#ratingSlider').show();
@@ -216,7 +248,7 @@ const handleCalibrateAnswer = (event) => {
     } else {
         ampInit[testValues.calPass] = 0.56 * ampInit[testValues.calPass];
     }
-    const buttonId = $('#testButtons').find('button:not(:disabled)').attr('id') // TODO get id of button
+    const buttonId = $('#testButtons').find('button:not(:disabled)').attr('id')
     console.log("The clicked button has id " + buttonId);
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testSettings[buttonId]
@@ -338,6 +370,18 @@ const handleParticipantForm = () => {
     });
 }
 
+const submitExperimentResults = (tinitusRating) => {
+    // TODO see tintest function of the same name
+}
+const complete = () => {
+    const tinitusRating = $('#tinnitusRatingField').val();
+    $("#up").remove();
+    $("#instruct").html('Thank you.  You are done!');
+    $("#startingInstr").remove();
+    $('#tinnitusRating').remove();
+    submitExperimentResults(tinitusRating);
+}
+
 const answerPhaseFunction = {
     finish: handleFinishAnswer,
     // bracketOne: handleBracketOneAnswer,
@@ -350,7 +394,8 @@ const answerPhaseFunction = {
 
 const donePhaseFunction = {
     calibrate: handleCalibrateDone,
-    levelSet: handleLevelSetDone
+    levelSet: handleLevelSetDone,
+    pitchRating: handlePitchRating
 }
 
 $.when( $.ready ).then(() => {
@@ -370,10 +415,17 @@ $.when( $.ready ).then(() => {
         $("button.answer").prop('disabled', true);
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
+
+        // TODO what plays the sound here when "play" is clicked on final match?
+        // should we refactor the code so that play and answer are different buttons?
     })
     $("#startId").click((event) => {
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
+    })
+    $('#submitTinRating').click((event) => {
+        event.preventDefault()
+        complete()
     })
 });
 
