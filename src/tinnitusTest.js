@@ -6,19 +6,16 @@ let currentPhase = 'calibrate';
 let testValues = null;
 
 const testSettings = {
-    testLow: {tonef: 500, calPass: 1},
-    testMid: {tonef: 3000, calPass: 6},
-    testHigh: {tonef: 8000, calPass: 11}
+    testLow: {tonef: 500, calPass: 0},
+    testMid: {tonef: 3000, calPass: 4},
+    testHigh: {tonef: 8000, calPass: 9}
 }
 
 const frequencies = [
-    //                  |                        |
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
-    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
-    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
-    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000];
+    //|                      |                             |
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies]
 
 const ratingCount = [];
@@ -144,41 +141,44 @@ const addLevelMatchingInstructions = () => {
                     <li>Note: You will see an orange circle while sound is playing.");
 }
 
-// TODO - needs a good comment on what is going on here
+// The following code sets  levels for all tones based on values set for calibration
+// low-frequency tones (500-1500) set to 500-Hz calibration amplitude
+// mid-frequency tones (2000-5000) set to 3000-Hz calibration
+// high-frequency tonres (6000 and above) set to 8000 Hz calibration
 // const testSettings = {
-//     testLow: {tonef: 500, calPass: 1},
-//     testMid: {tonef: 3000, calPass: 6},
-//     testHigh: {tonef: 8000, calPass: 11}
+//     testLow: {tonef: 500, calPass: 0},
+//     testMid: {tonef: 3000, calPass: 4},
+//     testHigh: {tonef: 8000, calPass: 9}
 // }
 
 const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
-    for (let step = 0; step < 4; step++) {
+    for (let step = 0; step < 3; step++) {
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 4; step < 8; step++) {
+    for (let step = 3; step < 7; step++) {
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 8; step < 15; step++) {
+    for (let step = 7; step < 13; step++) {
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 15; step < 19; step++) {
+    for (let step = 13; step < 16; step++) {
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 19; step < 24; step++) {
+    for (let step = 16; step < 20; step++) {
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 24; step < 30; step++) {
+    for (let step = 20; step < 26; step++) {
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 30; step < 34; step++) {
+    for (let step = 26; step < 29; step++) {
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 34; step < 38; step++) {
+    for (let step = 29; step < 33; step++) {
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 38; step < 45; step++) {
+    for (let step = 33; step < 39; step++) {
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
     console.log('ending state of ampInit', ampInit)
@@ -275,6 +275,34 @@ const switchToPitchRating = () => {
                 + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
     }
 }
+
+
+//TODO  JJL working on this for pitch matching
+const switchToPitchMatching = () => {
+    currentPhase = 'pitchMatching';
+    $("button.answer").prop('disabled', true)
+        .css({'cursor': 'not-allowed', 'opacity': '.1'});
+    $("#instruct").html('Instructions: Pitch Matching');
+    $("#startingInstr").html("<li id='Instructions'>In this phase of the experiment, we will measure\
+            the pitch of your tinnitus.</li>\
+        <li>You will hear two sounds, and your job is to pick the one that is most similar to your tinnitus.</li>\
+        <li>If you can't hear either sound, click the box on the left. </li><br>\
+        <li>Push <strong> Start </strong> when you are ready. </li><br>\
+        <li>Note: You will repeat this part of the experiment three times.</li>");
+    $('#finish').prop('disabled',true).css({'opacity': '.1'});
+    $('#startId').show().prop('disabled', false);
+    $('#down').hide();
+    $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
+    $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
+    frequencyIndex = 0;
+    for (step = 0; step < pitchRatingAmplitude.length; step++) {
+        pitchRatingAmplitude[step] =
+            (ampInit[step]
+                + ampInit[step + pitchRatingAmplitude.length]
+                + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
+    }
+}
+
 
 const handleCalibrateAnswer = (event) => {
     const increaseVolume = event.target.id === 'up'
