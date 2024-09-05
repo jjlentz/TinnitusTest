@@ -20,6 +20,44 @@
             margin: auto;
             text-align: center;
         }
+        div.slidecontainer {
+            width: 60%; /* Width of the outside container */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        input.slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 100%; /* Full-width */
+            height: 2em; /* Specified height */
+            border-radius: 2em;
+            background: lightgray; /* Grey background */
+            outline: none; /* Remove outline */
+            opacity: 0.8; /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+        }
+
+        input.slider::-webkit-slider-thumb, input.slider::-moz-range-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 2em; /* Set a specific slider handle width */
+            height: 2em; /* Slider handle height */
+            border-radius: 50%;
+            background: blue; /* blue background */
+            cursor: pointer; /* Cursor on hover */
+        }
+
+        div.badParticipant {
+            position: relative;
+            padding: .75rem 1.25rem;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            background-color: #f8d7da;
+        }
+
     </style>
 </head>
 <body>
@@ -116,18 +154,6 @@
                             even if you cannot hear the sounds later in the experiment.
                         </li>
                     </ul>
-                    <div>
-                        <form id="tinnitusRating" style="display: none">
-                            <label>Rate the similarity of the final sound to your tinnitus
-                                <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0"
-                                       required placeholder=""/><br>
-                            </label>
-                            <span>Use a number between 0 and 10. </span>
-                            <br/>
-                            <span> 0 = not at all similar to your tinnitus. 10 = identical </span>
-                            <button id="submitTinRating">Submit Rating</button>
-                        </form>
-                    </div>
                 </div>
 
                 <div class="cell experiment">
@@ -162,7 +188,7 @@
                             </div>
 
 
-                            <div class="slidecontainer" style="display: none" id="ratingSlider">
+                            <div class="slidecontainer cell is-col-span-4" style="display: none" id="ratingSlider">
                                 <label>
                                     <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
                                     <span style="float:left; width:20%; text-align: left">Not at all similar </span>
@@ -172,6 +198,18 @@
                                     <span style="float:left; width:20%; text-align: right"> Identical </span>
                                 </label>
 
+                            </div>
+                            <div class="cell is-col-span-4" >
+                                <form id="tinnitusRating" style="display: none">
+                                    <label>Rate the similarity of the final sound to your tinnitus
+                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0"
+                                               required placeholder=""/><br>
+                                    </label>
+                                    <p>Use a number between 0 and 10. </p>
+                                    <p>0 = not at all similar to your tinnitus</p>
+                                    <p>10 = identical</p>
+                                    <button id="submitTinRating" class="button is-primary">Submit Rating</button>
+                                </form>
                             </div>
                         </div>
                     </div>

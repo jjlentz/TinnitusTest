@@ -12,9 +12,13 @@ const testSettings = {
 }
 
 const frequencies = [
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
-    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000];
+    //                  |                        |
+    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
+    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
+    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000,
+    // 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000, 16000];
 const ratingsFrequencies = [...frequencies]
 
 const ratingCount = [];
@@ -38,9 +42,20 @@ function shuffle(freqArray, counterArray) {
     }
 }
 
+const topThreeIndices = (arr) => {
+    // create array of objects with value & index
+    const indexedArray = arr.map((value, index) => ({value, index}));
+    // sort descending
+    indexedArray.sort((a, b) => b.value - a.value);
+    // get the first 3 and return the indices
+    const largestElements = indexedArray.slice(0, 3);
+    return largestElements.map((el) => el.index)
+}
+
 const switchToFinalMatch = () => {
+    currentPhase = 'finish';
     $("#instruct").html('Instructions: Final Step');
-    $("#startingInstr").css({'text-align': 'center'});
+    // $("#startingInstr").css({'text-align': 'center'});
     $("#startingInstr").html("<h3 id='Instructions'>Push the Play button \
                             and use the dropdown menu to rate the similarity of that sound to your tinnitus. \
                             Push the Submit button to complete the experiment.</h3>");
@@ -76,23 +91,24 @@ const handlePitchRating = (event) => {
     console.log(`In handlePitchRating with event.target.id of ${event.target.id}`, event)
     if (event.target.id === 'startId') {
         $('#startId').hide();
-        const tone = rfreqs[frequencyIndex]
+        $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+        const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
         playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
-    } else if (event.target.id === 'finishButton') {
-        rating[fequencyIndex] = $('#rangeSlider').value;
-        console.log(`Recording rating of ${rating[fequencyIndex]} for index ${fequencyIndex}`);
-        if (fequencyIndex === frequencies.length) {
-             ();
+    } else if (event.target.id === 'finish') {
+        rating[frequencyIndex] = $('#rangeSlider').val();
+        console.log(`Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`);
+        if (frequencyIndex >= frequencies.length - 1) {
+            switchToFinalMatch();
         } else {
-            fequencyIndex++;
-            const tone = rfreqs[frequencyIndex]
+            frequencyIndex++;
+            const tone = ratingsFrequencies[frequencyIndex]
             const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
             playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
         }
     } else {
         // just play the same thing again
-        const tone = rfreqs[frequencyIndex]
+        const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
         playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     }
@@ -100,6 +116,20 @@ const handlePitchRating = (event) => {
 
 const handleFinishAnswer = (event) => {
     console.log(`handleFinishAnswer`)
+    const mostSimilarIndices = topThreeIndices(rating)
+    const tones = []
+    mostSimilarIndices.forEach((val) => {
+        tones.push({frequency: ratingsFrequencies[val], freqIndex: val})
+    })
+    console.log(`mostSimilarIndices are ${mostSimilarIndices}`);
+    tones.sort((a, b) => b.frequency - a.frequency);
+    let bestTone = tones[1];
+    console.log(`equating to tones ${JSON.stringify(tones)} with best ${JSON.stringify(bestTone)}`);
+    const tone = bestTone.frequency
+    const amplitude = pitchRatingAmplitude[ratingCount[bestTone.freqIndex]]
+
+    playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    $('#submitTinRating').prop('disabled', false)
 }
 
 const addLevelMatchingInstructions = () => {
@@ -115,35 +145,41 @@ const addLevelMatchingInstructions = () => {
 }
 
 // TODO - needs a good comment on what is going on here
-const doWhatever = () => {
+// const testSettings = {
+//     testLow: {tonef: 500, calPass: 1},
+//     testMid: {tonef: 3000, calPass: 6},
+//     testHigh: {tonef: 8000, calPass: 11}
+// }
+
+const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
-    for (step = 0; step < 4; step++) {
-        ampInit[step] = copy[1];
+    for (let step = 0; step < 4; step++) {
+        ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (step = 4; step < 8; step++) {
-        ampInit[step] = copy[6];
+    for (let step = 4; step < 8; step++) {
+        ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (step = 9; step < 12; step++) {
-        ampInit[step] = copy[11];
+    for (let step = 8; step < 15; step++) {
+        ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (step = 12; step < 16; step++) {
-        ampInit[step] = copy[1];
+    for (let step = 15; step < 19; step++) {
+        ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (step = 16; step < 20; step++) {
-        ampInit[step] = copy[6];
+    for (let step = 19; step < 24; step++) {
+        ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (step = 20; step < 24; step++) {
-        ampInit[step] = copy[11];
+    for (let step = 24; step < 30; step++) {
+        ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (step = 24; step < 28; step++) {
-        ampInit[step] = copy[1];
+    for (let step = 30; step < 34; step++) {
+        ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (step = 28; step < 32; step++) {
-        ampInit[step] = copy[6];
+    for (let step = 34; step < 38; step++) {
+        ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (step = 32; step < 36; step++) {
-        ampInit[step] = copy[11];
+    for (let step = 38; step < 45; step++) {
+        ampInit[step] = copy[testSettings.testHigh.calPass];
     }
     console.log('ending state of ampInit', ampInit)
 }
@@ -183,7 +219,7 @@ const switchToThree = () => {
 
 const beginLevelMatching = () => {
     currentPhase = 'levelSet';
-    doWhatever();
+    setLevelsFrequencyRanges();
     $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
     addLevelMatchingInstructions();
     setUplevelMatching();
@@ -224,11 +260,11 @@ const switchToPitchRating = () => {
         <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
         <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
         <li>Push <strong> Start </strong> when you are ready. </li><br>\
-        <li>Note: there are a total of 36 sounds in this section of the experiment.</li>");
+        <li>Note: there are a total of 45 sounds in this section of the experiment.</li>");
     $('#finish').prop('disabled',true).css({'opacity': '.1'});
-    $('#startId').show();
+    $('#startId').show().prop('disabled', false);
     $('#down').hide();
-    $('#up').html('Play');
+    $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
     frequencyIndex = 0;
@@ -371,15 +407,22 @@ const handleParticipantForm = () => {
 }
 
 const submitExperimentResults = (tinitusRating) => {
+    console.log(`submit tinitusRating of ${tinitusRating} and whatever additional data collected....`)
     // TODO see tintest function of the same name
 }
 const complete = () => {
     const tinitusRating = $('#tinnitusRatingField').val();
-    $("#up").remove();
-    $("#instruct").html('Thank you.  You are done!');
-    $("#startingInstr").remove();
-    $('#tinnitusRating').remove();
-    submitExperimentResults(tinitusRating);
+    console.log(`tinitusRating is ${tinitusRating}`)
+    if (tinitusRating !== '') {
+        $("#up").remove();
+        $("#instruct").html('Thank you.  You are done!');
+        $("#startingInstr").remove();
+        $('#tinnitusRating').remove();
+        submitExperimentResults(tinitusRating);
+    } else {
+        // TODO this isn't quite right as it is appending inside the heading tag
+        $("#instruct").append('<p>Rating is required</p>')
+    }
 }
 
 const answerPhaseFunction = {
@@ -395,7 +438,7 @@ const answerPhaseFunction = {
 const donePhaseFunction = {
     calibrate: handleCalibrateDone,
     levelSet: handleLevelSetDone,
-    pitchRating: handlePitchRating
+    pitchRating: handlePitchRating,
 }
 
 $.when( $.ready ).then(() => {
@@ -405,10 +448,11 @@ $.when( $.ready ).then(() => {
         event.preventDefault();
         handleCalibration(event.target.id)
     });
-    $('#finish').click(() => {
+    $('#finish').click((event) => {
         $("#levelAtMax").css({'opacity': '0'});
+        console.log(`finish button clicked in phase ${currentPhase}`)
         const handler = donePhaseFunction[currentPhase]
-        handler()
+        handler(event)
     })
     $("button.answer").click((event) => {
         console.log(`Answer button clicked ${event.target.id} in phase ${currentPhase}`)
@@ -420,6 +464,7 @@ $.when( $.ready ).then(() => {
         // should we refactor the code so that play and answer are different buttons?
     })
     $("#startId").click((event) => {
+        console.log(`startId button clicked in phase ${currentPhase}`)
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
     })
@@ -431,5 +476,9 @@ $.when( $.ready ).then(() => {
 
 
 
+
+// TODO see line 410
 // TODO during level setting could we disable done button while sound is playing?
 // really high pitch sounds are missing.
+// ENDING STATE OF AMPINIT (ampInit) appears to be all out of wack are we accounting for
+// the correct size??????
