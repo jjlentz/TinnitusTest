@@ -10,6 +10,7 @@
     <script src="howler-2.2.4.js"></script>
     <script src="tinnitusTest.js"></script>
     <style>
+        li.important {color:firebrick; font-weight: bold}
         .circle {
             border-radius: 50%;
             background-color: darkorange;
@@ -21,7 +22,7 @@
             text-align: center;
         }
         div.slidecontainer {
-            width: 60%; /* Width of the outside container */
+            width: 100%; /* Width of the outside container */
             margin-left: auto;
             margin-right: auto;
         }
@@ -129,7 +130,7 @@
                 <div class="cell content">
                     <h2 id="instruct" class="title is-3">Instructions: Setting up the study</h2>
                     <ul id="startingInstr">
-                        <li style="color:firebrick; font-weight: bold">Set the volume on your computer to about 25%.
+                        <li class="important">Set the volume on your computer to about 25%.
                         </li>
                         <li>After you set the volume, click the <strong> Test1 </strong> button to play a test sound.
                         </li>
@@ -142,18 +143,18 @@
                         </li>
                         <li>Then, click the <strong> Calibration Complete </strong> button.</li>
                     </ul>
-                    <h3 id="notes" class="title is-4">Important Notes:</h3>
-                    <ul id="notesBullets">
-                        <li class="has-text-weight-semibold">Wear your earphones so that the sound plays in your ear
-                            with the weaker tinnitus.
-                        </li>
-                        <li class="has-text-weight-semibold">If you have tinnitus in both ears, listen to the sound in
-                            your right ear.
-                        </li>
-                        <li class="has-text-weight-semibold">Please do not adjust the volume on your computer again,
-                            even if you cannot hear the sounds later in the experiment.
-                        </li>
-                    </ul>
+<!--                    <h3 id="notes" class="title is-4">Important Notes:</h3>-->
+<!--                    <ul id="notesBullets">-->
+<!--                        <li class="has-text-weight-semibold">Wear your earphones so that the sound plays in your ear-->
+<!--                            with the weaker tinnitus.-->
+<!--                        </li>-->
+<!--                        <li class="has-text-weight-semibold">If you have tinnitus in both ears, listen to the sound in-->
+<!--                            your right ear.-->
+<!--                        </li>-->
+<!--                        <li class="has-text-weight-semibold">Please do not adjust the volume on your computer again,-->
+<!--                            even if you cannot hear the sounds later in the experiment.-->
+<!--                        </li>-->
+<!--                    </ul>-->
                 </div>
 
                 <div class="cell experiment">
@@ -218,5 +219,19 @@
         </div>
     </section>
 </main>
+<footer class="footer" style="display: none; padding-top: 1.5rem">
+    <h3 id="notes" class="is-4">Important Notes:</h3>
+    <ul id="notesBullets">
+        <li class="has-text-weight-semibold">Wear your earphones so that the sound plays in your ear
+            with the weaker tinnitus.
+        </li>
+        <li class="has-text-weight-semibold">If you have tinnitus in both ears, listen to the sound in
+            your right ear.
+        </li>
+        <li class="has-text-weight-semibold">Please do not adjust the volume on your computer after
+            the initial calibration in Test1, even if you cannot hear the sounds later in the experiment.
+        </li>
+    </ul>
+</footer>
 </body>
 </html>

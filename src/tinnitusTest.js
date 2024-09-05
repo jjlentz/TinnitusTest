@@ -53,9 +53,9 @@ const switchToFinalMatch = () => {
     currentPhase = 'finish';
     $("#instruct").html('Instructions: Final Step');
     // $("#startingInstr").css({'text-align': 'center'});
-    $("#startingInstr").html("<h3 id='Instructions'>Push the Play button \
-                            and use the dropdown menu to rate the similarity of that sound to your tinnitus. \
-                            Push the Submit button to complete the experiment.</h3>");
+    $("#startingInstr").html("<li>Push the Play button to hear the last sound</li> \
+                            <li>Use the input to type or toggle input to rate the similarity of that sound to your tinnitus.</li> \
+                            <li>Push the Submit button to complete the experiment.</li>");
     $('#tinnitusRating').show();
     $("#ratingSlider").remove();
     $("#finish").remove();
@@ -224,29 +224,6 @@ const beginLevelMatching = () => {
     addLevelMatchingInstructions();
     setUplevelMatching();
 }
-// const beginBracketOne = () => {
-//     currentPhase = 'bracketOne';
-//     $("#instruct").html('Instructions: Break');
-//     $("startingInstr").css("color", "black")
-//     $("#startingInstr").html("<li id='Instructions'>Thank you!  The levels have been set! </li>\
-//                         <li>The next phase is a pitch matching experiment. </li> \
-//                         <li>You will hear two sounds after you push the <strong> start </strong> button. Click <strong>lower</strong> if your tinnitus better matches the lower (1st) sound. <br>\
-//                         Click <strong>higher</strong> if your tinnitus better matches the higher (2nd) sound. <br></li>");
-//     $("button.answer").prop('disabled', true).css({'cursor': 'not-allowed', 'opacity': '.1'});
-//     $("#down").html('tinnitus is lower');
-//     $("#up").html('tinnitus is higher');
-//     $("#startId").prop('disabled', false)
-//         .css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
-//     $("#finish").prop('disabled', true)
-//         .css({'opacity': '0'});
-//     for (step = 0; step < (frequencies.length / 3); step++) {
-//         amp[step] = (ampInit[step] + ampInit[step + 12] + ampInit[step + 24]) / 3;
-//     }
-// }
-
-// const handleBracketOneAnswer = (event) => {
-//     console.log(`handleBracketOneAnswer`)
-// }
 
 const switchToPitchRating = () => {
     currentPhase = 'pitchRating';
@@ -424,6 +401,7 @@ const handleParticipantForm = () => {
                 startTime = new Date();
                 $('#participation').hide();
                 $('#experiment').show();
+                $('footer.footer').show();
                 // ampInit
                 const value = participantData['hearingLoss'] === 'HL' ? 0.5 : 0.005;
                 ampInit = Array(frequencies.length).fill(value);
@@ -437,6 +415,33 @@ const handleParticipantForm = () => {
 const submitExperimentResults = (tinitusRating) => {
     console.log(`submit tinitusRating of ${tinitusRating} and whatever additional data collected....`)
     // TODO see tintest function of the same name
+    for (let i = 0; i < frequencies.length; i++) {
+        participantData['CalFreq'+i] = frequencies[i];
+    }
+    for (let i = 0; i < ampInit.length; i++) {
+        participantData['CalAmp'+i] = ampInit[i];
+    }
+    participantData['clinicalRating'] = tinitusRating
+    for (let i = 0; i < ratingsFrequencies.length; i++) {
+        participantData['rfreqs'+i] = ratingsFrequencies[i];
+    }
+    for (let i = 0; i < rating.length; i++) {
+        participantData['rating'+i] = rating[i];
+    }
+    console.log('POSTING DATA', participantData)
+    // TODO POST
+    // $.ajax({
+    //     type: 'POST',
+    //     url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/complete/',
+    //     dataType: 'json',
+    //     data: participantData
+    // }).done(() => {
+    //     console.log('DATA SAVED');
+    //     console.log(myData)
+    // }).fail((err) => {
+    //     console.error('Data not saved', err);
+    //     $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");
+    // });
 }
 const complete = () => {
     const tinitusRating = $('#tinnitusRatingField').val();
@@ -448,16 +453,12 @@ const complete = () => {
         $('#tinnitusRating').remove();
         submitExperimentResults(tinitusRating);
     } else {
-        // TODO this isn't quite right as it is appending inside the heading tag
-        $("#instruct").append('<p>Rating is required</p>')
+        $("#startingInstr").append('<li class="important">Rating is required</li>')
     }
 }
 
 const answerPhaseFunction = {
     finish: handleFinishAnswer,
-    // bracketOne: handleBracketOneAnswer,
-    // bracketTwo: handleBracketTwoAnswer,
-    // bracketThree: handleBracketThreeAnswer,
     calibrate: handleCalibrateAnswer,
     levelSet: handleLevelSet,
     pitchRating: handlePitchRating
@@ -487,9 +488,6 @@ $.when( $.ready ).then(() => {
         $("button.answer").prop('disabled', true);
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
-
-        // TODO what plays the sound here when "play" is clicked on final match?
-        // should we refactor the code so that play and answer are different buttons?
     })
     $("#startId").click((event) => {
         console.log(`startId button clicked in phase ${currentPhase}`)
@@ -502,11 +500,5 @@ $.when( $.ready ).then(() => {
     })
 });
 
-
-
-
-// TODO see line 410
 // TODO during level setting could we disable done button while sound is playing?
-// really high pitch sounds are missing.
-// ENDING STATE OF AMPINIT (ampInit) appears to be all out of wack are we accounting for
-// the correct size??????
+
