@@ -11,12 +11,18 @@ const testSettings = {
     testHigh: {tonef: 8000, calPass: 9}
 }
 
+
 const frequencies = [
-    //|                      |                             |
-    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
+    500, 1500, 3000, 5000, 7000, 8000, 12000,
+    500, 1500, 3000, 5000, 7000, 8000, 12000,
+    500, 1500, 3000, 5000, 7000, 8000, 12000]
+    // //|                      |                             |
+    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies]
+// assume all frequencies will be heard, and only mark them otherwise if they are not.
+const heardFrequencies = Array(frequencies.length).fill(true);
 
 const ratingCount = [];
 const rating = [];
@@ -75,7 +81,26 @@ const handleLevelSetDone = (event) => {
 const handleLevelSet = (event) => {
     const increaseVolume = event.target.id === 'up'
     if (increaseVolume) {
-        ampInit[frequencyIndex] = 1.78 * ampInit[frequencyIndex];
+        let maxVolume = parseInt($(event.currentTarget).attr('maxvolume'));
+        console.log(`Current maxvolume is ${maxVolume}`, event.target);
+        const value = 1.78 * ampInit[frequencyIndex];
+        if (value > 1) {
+            maxVolume += 1;
+            // using >= coerces both vars to numbers while vs >== does not, and here we want to coercion
+            if (maxVolume > 3) {
+                console.log('maxVolume attempts exceeded');
+                const heard = confirm('Press OK if you can hear a sound, but it is still softer than your tinnitus or Cancel if you can just barely hear the sound or it is not audible.')
+                heardFrequencies[frequencyIndex] = heard;
+                // reset before moving on
+                $('#up').attr('maxvolume', 0)
+                return handleLevelSetDone(event)
+            }
+            console.log('bumping maxvolume')
+            $('#up').attr('maxvolume', maxVolume)
+            ampInit[frequencyIndex] = 1;
+        } else {
+            ampInit[frequencyIndex] = value;
+        }
     } else {
         ampInit[frequencyIndex] = 0.56 * ampInit[frequencyIndex];
     }
@@ -99,9 +124,12 @@ const handlePitchRating = (event) => {
             switchToFinalMatch();
         } else {
             frequencyIndex++;
-            const tone = ratingsFrequencies[frequencyIndex]
-            const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-            playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+            // TODO - this isn't actually any good, you need to jump ahead to the next hear-able freq while also handling finish?
+            if (heardFrequencies[frequencyIndex]) {
+                const tone = ratingsFrequencies[frequencyIndex]
+                const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+                playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+            }
         }
     } else {
         // just play the same thing again
@@ -154,31 +182,31 @@ const addLevelMatchingInstructions = () => {
 const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
-    for (let step = 0; step < 3; step++) {
+    for (let step = 0; step < 2; step++) {   // 0 & 4
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 3; step < 7; step++) {
+    for (let step = 2; step < 5; step++) {  // 4 & 9
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 7; step < 13; step++) {
+    for (let step = 5; step < 7; step++) { // 9 & 13
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 13; step < 16; step++) {
+    for (let step = 7; step < 9; step++) { // 13 & 17
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 16; step < 20; step++) {
+    for (let step = 9; step < 12; step++) { // 17 & 22
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 20; step < 26; step++) {
+    for (let step = 12; step < 14; step++) {  // 22 & 26
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 26; step < 29; step++) {
+    for (let step = 14; step < 16; step++) {  // 26 & 30
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 29; step < 33; step++) {
+    for (let step = 16; step < 19; step++) { // 30 & 35
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 33; step < 39; step++) {
+    for (let step = 19; step < 21; step++) { // 35 & 39
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
     console.log('ending state of ampInit', ampInit)
@@ -325,15 +353,20 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
     const source = `${filePrefix}wav${tone}.wav`
 
-    const sound = new Howl({
+    const howlOptions = {
         src: [source],
-        html5: true // Force to HTML5 so that the audio can stream in (best for large files).
-    });
+        html5: true
+    }
+    if (amplitude) {
+        howlOptions['volume'] = amplitude;
+    }
+
+    const sound = new Howl(howlOptions);
 
     console.log(`Hello from playOneSound with src ${source} ${tinnitusType}:${ear}:${amplitude}:${tone}`)
-    if (amplitude) {
-        Howler.volume(amplitude)
-    }
+    // if (amplitude) {
+    //     Howler.volume(amplitude)
+    // }
     sound.play();
 
     setTimeout(() => {
