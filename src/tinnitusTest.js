@@ -124,11 +124,14 @@ const handlePitchRating = (event) => {
             switchToFinalMatch();
         } else {
             frequencyIndex++;
-            // TODO - this isn't actually any good, you need to jump ahead to the next hear-able freq while also handling finish?
             if (heardFrequencies[frequencyIndex]) {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
                 playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+            } else {
+                console.log('recursively calling self')
+                // TODO is this the right thing to do?
+                handlePitchRating(event)
             }
         }
     } else {
