@@ -80,7 +80,7 @@ const handleLevelSetDone = (event) => {
         const amplitude = ampInit[++frequencyIndex]
         const tone = frequencies[frequencyIndex]
         // JJL PUT BACK IN
-        // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     }
 }
 
@@ -140,7 +140,7 @@ const handleLevelSet = (event) => {
     const amplitude = ampInit[frequencyIndex]
     const tone = frequencies[frequencyIndex]
     // JJL PUT BACK IN
-    // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
 }
 
 const handlePitchMatching = (event) => {
@@ -150,34 +150,23 @@ const handlePitchMatching = (event) => {
     } else if (event.target.id ==='up'){
         frequencyIndex++
     }
-    console.log(`In handlePitchMatching with start counter`, frequencyIndex)
-    console.log(`In handlePitchMatching with end counter`, endFrequencyIndex)
+    console.log(`handlePitchMatching with start ${frequencyIndex} vs end ${endFrequencyIndex}`)
+
     if (frequencyIndex != endFrequencyIndex) {
         // $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
         const tone1 = bracketFrequencies[frequencyIndex]
         const amplitude1 = pitchMatchingAmplitude[frequencyIndex]
-        console.log(`In handlePitchMatching with tone1`, tone1)
-        console.log(`In handlePitchMatching with amplitude1`, amplitude1)
-        playOneSound(participantData['tinnitusType'], soundEar, amplitude1, tone1, null)
+        //console.log(`In handlePitchMatching with tone1`, tone1)
+        //console.log(`In handlePitchMatching with amplitude1`, amplitude1)
+        //playOneSound(participantData['tinnitusType'], soundEar, amplitude1, tone1, null)
         const tone2 = bracketFrequencies[endFrequencyIndex]
         const amplitude2 = pitchMatchingAmplitude[endFrequencyIndex]
-        console.log(`In handlePitchMatching with tone2`, tone2)
-        console.log(`In handlePitchMatching with amplitude2`, amplitude2)
-
-        setTimeout(() => {
-            playOneSound(participantData['tinnitusType'], soundEar, amplitude2, tone2, null)
-        }, TONE_DURATION * 2000);
-        // Need to fix this so that the buttons stay disabled
-
+        // console.log(`In handlePitchMatching with tone2`, tone2)
+        // console.log(`In handlePitchMatching with amplitude2`, amplitude2)
+        playTwoSounds(participantData['tinnitusType'], soundEar, amplitude1, amplitude2, tone1, tone2);
     } else {
         return handlePitchMatchingDone(event)
     }
-    // Need to figure out how to get the sounds to play each time
-    // } else {
-    //     if (event.target.id === "up") {
-    //         frequencyindex++
-    //     }
-    // }
 }
 
 const handlePitchRating = (event) => {
@@ -435,18 +424,13 @@ const handleCalibrateDone = () => {
 }
 
 function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
-    $('button').prop('disabled', true)
-    // $("#finish").prop('disabled', true);
+    $('button').prop('disabled', true);
     $("#ansButton1 button").css({'cursor': 'not-allowed'});
     $("#ansButton2 button").css({'cursor': 'not-allowed'});
-    // $("#startId").prop('disabled', true);
-    setTimeout(() => {
-        $("#soundIndicator").show();
-        $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
-    }, 250);
+    $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
+
     const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
     const source = `${filePrefix}wav${tone}.wav`
-
     const howlOptions = {
         src: [source],
         html5: true
@@ -454,16 +438,12 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     if (amplitude) {
         howlOptions['volume'] = amplitude;
     }
-
     const sound = new Howl(howlOptions);
 
     console.log(`Hello from playOneSound with src ${source} ${tinnitusType}:${ear}:${amplitude}:${tone}`)
-    // if (amplitude) {
-    //     Howler.volume(amplitude)
-    // }
     sound.play();
 
-    setTimeout(() => {
+    sound.on('end', () => {
         if (buttonId) {
             $('#'+buttonId).prop('disabled', false);
         }
@@ -471,25 +451,19 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
         $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
         $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
-    }, TONE_DURATION * 1500);
-
+    });
 }
 
 function playTwoSounds(tinnitusType, ear, amplitude1, amplitude2, tone1, tone2, buttonId) {
-    $('button').prop('disabled', true)
-    // $("#finish").prop('disabled', true);
-    $("#ansButton1 button").css({'cursor': 'not-allowed'});
-    $("#ansButton2 button").css({'cursor': 'not-allowed'});
-    // $("#startId").prop('disabled', true);
-    setTimeout(() => {
-        $("#soundIndicator").show();
-        $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
-    }, 250);
+    $('button').prop('disabled', true).css({'cursor': 'not-allowed'});
+    console.log(`playTwoSounds with ${amplitude1}:${tone1} vs ${amplitude2}:${tone2}`)
+    $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
+
     const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
     const source1 = `${filePrefix}wav${tone1}.wav`
     const source2 = `${filePrefix}wav${tone2}.wav`
 
-    const howlOptions = {
+    let howlOptions = {
         src: [source1],
         html5: true
     }
@@ -497,56 +471,28 @@ function playTwoSounds(tinnitusType, ear, amplitude1, amplitude2, tone1, tone2, 
         howlOptions['volume'] = amplitude1;
     }
 
-    const sound = new Howl(howlOptions);
+    let sound = new Howl(howlOptions);
+    sound.play()
+    sound.on('end', () => {
+        setTimeout(() => {
+            howlOptions = {
+                src: [source2],
+                html5: true
+            }
+            if (amplitude2) {
+                howlOptions['volume'] = amplitude2;
+            }
+            const nextSound = new Howl(howlOptions);
+            nextSound.play();
+            nextSound.on('end', () => {
+                $("#finish").prop('disabled', false).css({'cursor': 'pointer'});
+                $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
+                $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
+                $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
+            })
 
-    console.log(`Hello from playTwoSounds with src ${source1} ${tinnitusType}:${ear}:${amplitude1}:${tone1}`)
-    // if (amplitude) {
-    //     Howler.volume(amplitude)
-    // }
-    sound.play();
-
-    setTimeout(() => {
-        // if (buttonId) {
-        //     $('#'+buttonId).prop('disabled', false);
-        // }
-        // $("#finish").prop('disabled', false);
-        // $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
-        // $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
-        $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
-    }, TONE_DURATION * 1500);
-
-    setTimeout(() => {
-        $("#soundIndicator").show();
-        $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
-    }, 250);
-
-    // // const howlOptions = {
-    // //     src: [source2],
-    // //     html5: true
-    // // }
-    // if (amplitude2) {
-    //     howlOptions['volume'] = amplitude2;
-    // }
-
-    // const sound = new Howl(howlOptions);
-
-    console.log(`Hello from playTwoSounds with src ${source2} ${tinnitusType}:${ear}:${amplitude2}:${tone2}`)
-    // if (amplitude) {
-    //     Howler.volume(amplitude)
-    // }
-    sound.play();
-
-    setTimeout(() => {
-        if (buttonId) {
-            $('#'+buttonId).prop('disabled', false);
-        }
-        $("#finish").prop('disabled', false);
-        $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
-        $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
-        $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
-    }, TONE_DURATION * 1500);
-
-
+        }, 500)
+    })
 }
 
 const handleCalibration = (buttonId) => {
@@ -670,7 +616,8 @@ const donePhaseFunction = {
     calibrate: handleCalibrateDone,
     levelSet: handleLevelSetDone,
     pitchRating: handlePitchRating,
-    pitchMatching: handlePitchMatchingDone
+    // TODO delete this line cuz there is no Done button in pitch matching right?
+    //pitchMatching: handlePitchMatchingDone
 }
 
 $.when( $.ready ).then(() => {
