@@ -2,6 +2,7 @@ const TONE_DURATION = 2
 let participantData = {};
 let startTime = 0;
 let soundEar = "R";
+let tinnitusTypeMeasured = "Tonal";
 let currentPhase = 'calibrate';
 let testValues = null;
 
@@ -15,7 +16,7 @@ const testSettings = {
 const frequencies = [
     500, 1000, 3000, 5000, 8000,
     500, 1000, 3000, 5000, 8000,
-    500, 1000, 3000, 5000, 8000]
+    500, 1000, 3000, 5000, 8000];
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000]
@@ -23,8 +24,8 @@ const frequencies = [
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
-const ratingsFrequencies = [...frequencies]
-const bracketFrequencies = [500, 1000, 3000, 5000, 8000]  // JJL Need Stu's help to clean up
+const ratingsFrequencies = [...frequencies];
+let bracketFrequencies = frequencies.slice(0, frequencies.length / 3);  
 // assume all frequencies will be heard, and only mark them otherwise if they are not.
 const heardFrequencies = Array(frequencies.length).fill(true);
 
@@ -38,6 +39,9 @@ for (let step = 0; step < ratingsFrequencies.length; step++) {
 // will be initialized later
 let ampInit = null;
 let frequencyIndex = 0;
+let arrayIndex = 0;
+let endArrayIndex = 0;
+let pitchMatchingCounter = 0;
 const pitchRatingAmplitude = [...new Array(frequencies.length/3)].map(() => 0)
 const pitchMatchingAmplitude = [...new Array(bracketFrequencies)].map(() => 0)
 
@@ -74,45 +78,18 @@ const switchToFinalMatch = () => {
 const handleLevelSetDone = (event) => {
     console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
     if (frequencyIndex === (frequencies.length - 1)) {
-        console.log('handle move to the pitchMatching')
-        switchToPitchMatching()
+        console.log('handle move to qualityhMatching')
+        switchToQualityMatching()
     } else {
         const amplitude = ampInit[++frequencyIndex]
         const tone = frequencies[frequencyIndex]
-        // JJL PUT BACK IN
+        // TODO JJL PUT BACK IN
         playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     }
 }
 
-const handlePitchMatchingDone = (event) => {
-    console.log(`Hello from handlePitchMatchingDone`)
-    console.log('tone frequency =',bracketFrequencies[frequencyIndex]) // JJL TODO Need to save this
-    frequencyIndex = 0;
-    endFrequencyIndex = bracketFrequencies.length - 1;
-    pitchMatchingCounter++
-    if (pitchMatchingCounter === 3) {
-        switchToPitchRating()
-    } else {
-        //maybe not the cleanest way to program this
-        const tone1 = bracketFrequencies[frequencyIndex]
-        const amplitude1 = pitchMatchingAmplitude[frequencyIndex]
-        console.log(`In handlePitchMatchingDone with tone1`, tone1)
-        console.log(`In handlePitchMatchingDone with amplitude1`, amplitude1)
-        playOneSound(participantData['tinnitusType'], soundEar, amplitude1, tone1, null)
-        const tone2 = bracketFrequencies[endFrequencyIndex]
-        const amplitude2 = pitchMatchingAmplitude[endFrequencyIndex]
-        console.log(`In handlePitchMatchingDone with tone2`, tone2)
-        console.log(`In handlePitchMatchingDone with amplitude2`, amplitude2)
-
-        setTimeout(() => {
-            playOneSound(participantData['tinnitusType'], soundEar, amplitude2, tone2, null)
-        }, TONE_DURATION * 2000);
-
-    }
-}
-
 const handleLevelSet = (event) => {
-        $('#startId').hide();
+        $('#startId').show();
         if (event.target.id === 'up') {
         let maxVolume = parseInt($(event.currentTarget).attr('maxvolume'));
         console.log(`Current maxvolume is ${maxVolume}`, event.target);
@@ -143,31 +120,85 @@ const handleLevelSet = (event) => {
     playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
 }
 
+const switchToQualityMatching = () => {
+    currentPhase = 'qualityMatching';
+    console.log('Hello from switch to qualityMatching');
+    $('#startId').show();
+    $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    addQualityMatchingInstructions();
+    setUpPitchAndQualityMatching();  //This sets up the buttons only
+    for (step = 0; step < pitchRatingAmplitude.length / 3; step++) {
+        pitchMatchingAmplitude[step] =
+        (ampInit[step]
+            + ampInit[step + pitchRatingAmplitude.length]
+            + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
+    }
+}
+
+const switchToPitchMatching = () => {
+    currentPhase = 'pitchMatching';
+    console.log('Hello from switch to pitchMatching');
+    $('#startId').show().prop('disabled', false).css({'opacity': '1'});
+    $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    addPitchMatchingInstructions();
+}
+
 const handlePitchMatching = (event) => {
     $('#startId').hide();
     if (event.target.id === 'down') {
-        endFrequencyIndex--
+        endArrayIndex--
     } else if (event.target.id ==='up'){
-        frequencyIndex++
+        arrayIndex++
     }
-    console.log(`handlePitchMatching with start ${frequencyIndex} vs end ${endFrequencyIndex}`)
 
-    if (frequencyIndex != endFrequencyIndex) {
-        // $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-        const tone1 = bracketFrequencies[frequencyIndex]
-        const amplitude1 = pitchMatchingAmplitude[frequencyIndex]
-        //console.log(`In handlePitchMatching with tone1`, tone1)
-        //console.log(`In handlePitchMatching with amplitude1`, amplitude1)
-        //playOneSound(participantData['tinnitusType'], soundEar, amplitude1, tone1, null)
-        const tone2 = bracketFrequencies[endFrequencyIndex]
-        const amplitude2 = pitchMatchingAmplitude[endFrequencyIndex]
-        // console.log(`In handlePitchMatching with tone2`, tone2)
-        // console.log(`In handlePitchMatching with amplitude2`, amplitude2)
-        playTwoSounds(participantData['tinnitusType'], soundEar, amplitude1, amplitude2, tone1, tone2);
-    } else {
-        return handlePitchMatchingDone(event)
+    // TODO Need to save final frequencies (when the indices are equal)
+    var tone1 = bracketFrequencies[arrayIndex];
+    var amplitude1 = pitchMatchingAmplitude[arrayIndex];
+    var tone2 = bracketFrequencies[endArrayIndex];
+    var amplitude2 = pitchMatchingAmplitude[endArrayIndex];
+    if (pitchMatchingCounter < 2) {
+        if (arrayIndex == endArrayIndex) {
+            pitchMatchingCounter++; 
+            arrayIndex = 0;
+            endArrayIndex = bracketFrequencies.length - 1;
+            console.log(`handlePitchMatching with start ${arrayIndex} vs end ${endArrayIndex}`);
+            tone1 = bracketFrequencies[arrayIndex];
+            amplitude1 = pitchMatchingAmplitude[arrayIndex];
+            tone2 = bracketFrequencies[endArrayIndex];
+            amplitude2 = pitchMatchingAmplitude[endArrayIndex];
+        }
+        if (pitchMatchingCounter === 2) {
+            switchToPitchRating();
+        } else {
+            playTwoSounds(tinnitusTypeMeasured, tinnitusTypeMeasured, soundEar, amplitude1, amplitude2, tone1, tone2);
+        }
     }
 }
+
+const handleQualityMatching = (event) => {
+    $('#startId').hide();
+    if (event.target.id === 'down') {
+        tinnitusTypeMeasured = 'Tonal';
+        switchToPitchMatching();
+        console.log("Hello from handleQualityMatching - tonal");
+    } else if (event.target.id ==='up'){
+        tinnitusTypeMeasured = 'Noise';
+        switchToPitchMatching();
+        console.log("Hello from handleQualityMatching - tonal");
+    }
+
+    if (event.target.id === 'startId') {
+        const tone = 1000;
+        const frequencyIndex = bracketFrequencies.indexOf(tone)
+        console.log("Hello from handleQualityMatching - after ifs");
+        console.log(bracketFrequencies)
+        console.log(frequencyIndex)
+        const amplitude = pitchMatchingAmplitude[frequencyIndex];
+        console.log(pitchMatchingAmplitude)
+        playTwoSounds('Tonal', 'Noisy', soundEar, amplitude, amplitude, tone, tone);
+    // TODO JJL needs to fix playtwosounds routing to handle two different sounds
+}
+ }
 
 const handlePitchRating = (event) => {
     console.log(`In handlePitchRating with event.target.id of ${event.target.id}`, event)
@@ -232,12 +263,21 @@ const addLevelMatchingInstructions = () => {
                     <li>Note: You will see an orange circle while sound is playing.");
 }
 
+const addQualityMatchingInstructions = () => {
+    $("#instruct").html('Instructions: Quality Matching');
+    $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play two sounds. </li>\
+                    <li>If the quality of your tinnitus sounds more like the first sound, click the \
+                        <strong> Sound 1 </strong> button. </li>\
+                    <li>If the quality of your tinnitus sounds more like the second sound, click the <strong> Sound 2 </strong> button.</li>\
+                    <li>Note: You will see an orange circle while sound is playing.");
+}
+
 const addPitchMatchingInstructions = () => {
     $("#instruct").html('Instructions: Pitch Matching');
     $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play two sounds. </li>\
-                    <li>If your tinnitus is more similar to the sound that played first, click the \
+                    <li>If the pitch of your tinnitus is more similar to the sound that played first, click the \
                         <strong> Sound 1 </strong> button. </li>\
-                    <li>If your tinnitus is more similar to the sound played second, click the <strong> Sound 2 </strong> button.</li>\
+                    <li>If the pitch of your tinnitus is more similar to the sound played second, click the <strong> Sound 2 </strong> button.</li>\
                     <li style='color:firebrick'><strong>This procedure will repeat a number of times.</strong></li>\
                     <li>Note: You will see an orange circle while sound is playing.");
 }
@@ -251,7 +291,9 @@ const addPitchMatchingInstructions = () => {
 //     testHigh: {tonef: 8000, calPass: 9}
 // }
 
-const setLevelsFrequencyRanges = () => {
+//TODO Need to fix for final version
+
+    const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
     for (let step = 0; step < 2; step++) {   // 0 & 4
@@ -282,7 +324,7 @@ const setLevelsFrequencyRanges = () => {
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
     console.log('ending state of ampInit', ampInit)
-}
+} 
 
 const setUplevelMatching = () => {
     // remove the calibration test buttons
@@ -290,12 +332,12 @@ const setUplevelMatching = () => {
     $("#down").html('tinnitus is softer');
     $("#up").html('tinnitus is louder');
     $("#finish").html("Done");
-    $("#startId").prop('disabled', false);
+    $("#startId").show().prop('disabled', false);
+    //Setting up new frequency range
 }
 
-const setUpPitchMatching = () => {
-    // rename the buttons used in Level Matching (2 buttons)
-    // TODO setup the bracket frequencies re: audibility
+const setUpPitchAndQualityMatching = () => {
+    // Sets up the buttons for pitch matching
     // $('#testButtons>button').remove()
     $("#down").html('Sound 1');
     $("#up").html('Sound 2');
@@ -363,7 +405,7 @@ const switchToPitchRating = () => {
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
     frequencyIndex = 0;
-    //JJL Take out and rename amplitude values for pitch rating after pitch matching works
+    //TODO JJL Take out and rename amplitude values for pitch rating after pitch matching works
     for (step = 0; step < pitchRatingAmplitude.length; step++) {
         pitchRatingAmplitude[step] =
             (ampInit[step]
@@ -371,26 +413,6 @@ const switchToPitchRating = () => {
                 + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
     }
 }
-
-//TODO  JJL working on this for pitch matching
-const switchToPitchMatching = () => {
-    currentPhase = 'pitchMatching';
-    // setLevelsFrequencyRanges();
-    $('#startId').show();
-    $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
-    addPitchMatchingInstructions();
-    setUpPitchMatching();
-    frequencyIndex = 0;
-    endFrequencyIndex = bracketFrequencies.length - 1;
-    pitchMatchingCounter = 0
-    for (step = 0; step < bracketFrequencies.length; step++) {
-        pitchMatchingAmplitude[step] =
-            (ampInit[step]
-                + ampInit[step + pitchMatchingAmplitude.length]
-                + ampInit[step + (2 * pitchMatchingAmplitude.length)]) / 3;
-    }
-}
-
 
 const handleCalibrateAnswer = (event) => {
     const increaseVolume = event.target.id === 'up'
@@ -429,8 +451,15 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     $("#ansButton2 button").css({'cursor': 'not-allowed'});
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
 
-    const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
-    const source = `${filePrefix}wav${tone}.wav`
+    //TODO Amplitude of first sound (8000 Hz is not passing correctly).  Needs fixing.
+
+    // TODO MAybe Stu can make this cleaner
+    var filePrefix = ear + 'wav';
+    if (tinnitusType === "Noisy") {
+        filePrefix = ear + 'wavNoise';
+    }
+        
+    const source = `${filePrefix}${tone}.wav`
     const howlOptions = {
         src: [source],
         html5: true
@@ -454,14 +483,25 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     });
 }
 
-function playTwoSounds(tinnitusType, ear, amplitude1, amplitude2, tone1, tone2, buttonId) {
+function playTwoSounds(tinnitusTypeS1, tinnitusTypeS2, ear, amplitude1, amplitude2, tone1, tone2, buttonId) {
     $('button').prop('disabled', true).css({'cursor': 'not-allowed'});
-    console.log(`playTwoSounds with ${amplitude1}:${tone1} vs ${amplitude2}:${tone2}`)
+    console.log(`playTwoSounds with ${tinnitusTypeS1}:${amplitude1}:${tone1} vs ${tinnitusTypeS2}:${amplitude2}:${tone2}`)
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
 
-    const filePrefix = tinnitusType === "Noisy" ? ear + 'Noise' : ear
-    const source1 = `${filePrefix}wav${tone1}.wav`
-    const source2 = `${filePrefix}wav${tone2}.wav`
+    var filePrefix1 = ear + 'wav';
+    if (tinnitusTypeS1 === "Noisy") {
+        filePrefix1 = ear + 'wavNoise';
+    } 
+
+    var filePrefix2 = ear + 'wav';
+    if (tinnitusTypeS2 === "Noisy") {
+        filePrefix2 = ear + 'wavNoise';
+    }
+
+    //TODO - need to adjust the amplitudes of the noise so they are same as the tone; max may also need to be different!
+    const source1 = `${filePrefix1}${tone1}.wav`
+    const source2 = `${filePrefix2}${tone2}.wav`
+    console.log(`playTwoSounds with ${source1}:${source2}`)
 
     let howlOptions = {
         src: [source1],
@@ -499,7 +539,7 @@ const handleCalibration = (buttonId) => {
     console.log(`The clicked button has id ${buttonId}`)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testSettings[buttonId]
-    const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass]
+    const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass] //TODO Need to resaerch what "Null" means in this context
     playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, buttonId)
     $("#finish").prop('disabled', false);
     $("#finish").css({'opacity': '1','cursor': 'pointer' });
@@ -533,7 +573,7 @@ const handleParticipantForm = () => {
         } else if (participantData['tinnitusEar'] === "Left"){
             soundEar = "R";
         } else {
-            soundEar = "S";
+            soundEar = "R";  //Sound played in Right ear if tinnitus is bilateral
         }
         // TODO POST THE DATA
         console.log(`SUBMITTING ${JSON.stringify({participantId: pid, browser: navigator.userAgent})}`)
@@ -609,7 +649,8 @@ const answerPhaseFunction = {
     calibrate: handleCalibrateAnswer,
     levelSet: handleLevelSet,
     pitchRating: handlePitchRating,
-    pitchMatching: handlePitchMatching
+    pitchMatching: handlePitchMatching, 
+    qualityMatching: handleQualityMatching
 }
 
 const donePhaseFunction = {
