@@ -16,11 +16,10 @@ const testNoiseSettings = {
     testNoise: {tonef: 2000}
 }
 
-
 const frequencies = [
-    500, 1000, 3000, 5000, 8000,
-    500, 1000, 3000, 5000, 8000,
-    500, 1000, 3000, 5000, 8000];
+    500, 1000, 3000, 4000, 8000,
+    500, 1000, 3000, 4000, 8000,
+    500, 1000, 3000, 4000, 8000];
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000]
@@ -29,9 +28,11 @@ const frequencies = [
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies];
-let bracketFrequencies = frequencies.slice(0, frequencies.length / 3);  
+// let bracketFrequencies = frequencies.slice(0, frequencies.length / 3);  
+let bracketFrequencies = [500, 1000, 2000, 4000];
 // assume all frequencies will be heard, and only mark them otherwise if they are not.
 const heardFrequencies = Array(frequencies.length).fill(true);
+const pitchMatchResult = [];
 
 const ratingCount = [];
 const rating = [];
@@ -72,20 +73,52 @@ const topThreeIndices = (arr) => {
 
 const switchToFinalMatch = () => {
     currentPhase = 'finish';
-    $("#instruct").html('Instructions: Final Step');
-    // $("#startingInstr").css({'text-align': 'center'});
-    $("#startingInstr").html("<li>Push the Play button to hear the last sound</li> \
-                            <li>Use the input to type or toggle input to rate the similarity of that sound to your tinnitus.</li> \
-                            <li>Push the Submit button to complete the experiment.</li>");
+    console.log('Hello from switchToFinalMatch')
+    $("#instruct").html('Instructions: Final Pitch Test');
+    $("#startingInstr").html("<li>Listen to each of these sounds</li> \
+                            <li>After listening to them, type which sound best matched your tinnitus into the textbox.</li> \
+                            <li>Push the Submit button to store your answer.</li>");
+    $("#ansButton1").remove();
+    $("#ansButton2").remove();
+    $('#testButtons').show();
+    $('#testHigh').html('Sound 1').prop('disabled', false).css({'opacity' : '1', 'cursor': 'pointer'});
+    $('#testMid').html('Sound 2').prop('disabled', false).css({'opacity' : '1', 'cursor': 'pointer'});
+    $('#testLow').html('Sound 3').prop('disabled', false).css({'opacity' : '1', 'cursor': 'pointer'});
     $('#tinnitusRating').show();
     $("#ratingSlider").remove();
     $("#finish").remove();
+    // sorting PitchMatchResult to establish most common value for the final pitch match, the middle one
+    pitchMatchResult.sort((a, b) => b.value - a.value);  
+    // let lower = undefined;
+    // let higher = undefined; 
+
+    const bestMatchedTone = pitchMatchResult[1];
+    let lower = bestMatchedTone.value / 2;
+    let higher = bestMatchedTone.value * 2;
+    if ((bestMatchedTone.index !== 0) && (bracketFrequencies.includes(lower) === false)) {
+        lower = undefined;
+    } 
+    
+    if ((bestMatchedTone.index !== bracketFrequencies.length - 1) && (bracketFrequencies.includes(higher) === false)) {
+        higher = undefined;
+    } 
+    
+    if (bestMatchedTone.value === 8000) {
+        higher = 12000;
+    } else if (bestMatchedTone.value === 750) {
+        lower = 500;
+    }
+    
+    $('#testLow').attr('tone',lower);
+    $('#testMid').attr('tone',bestMatchedTone.value);
+    $('#testHigh').attr('tone',higher);
 }
+
 const handleLevelSetDone = (event) => {
     console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
     if (frequencyIndex === (frequencies.length - 1)) {
-        console.log('handle move to qualityhMatching')
-        switchToPitchRating()
+        console.log('switchToPitchRating')
+        switchToPitchMatching()
     } else {
         const amplitude = ampInit[++frequencyIndex]
         const tone = frequencies[frequencyIndex]
@@ -95,7 +128,9 @@ const handleLevelSetDone = (event) => {
 }
 
 const handleLevelSet = (event) => {
+    console.log('Hello from handleLevelSet');
     $('#startId').prop('disabled', false).css({'opacity': '1'});
+    $('#finish').prop('disabled', false).css({'opacity': '1'});
         if (event.target.id === 'up') {
         let maxVolume = parseInt($(event.currentTarget).attr('maxvolume'));
         console.log(`Current maxvolume is ${maxVolume}`, event.target);
@@ -129,6 +164,10 @@ const handleLevelSet = (event) => {
 const switchToQualityMatching = () => {
     currentPhase = 'qualityMatching';
     console.log('Hello from switch to qualityMatching');
+    const alertText = "Please do not adjust the volume on your computer any longer, "
+        + "even if you can't hear the sounds."
+    alert(alertText);
+    $('#volumeInstructions').removeClass('is-invisible');
     $('#startId').prop('disabled', false).css({'opacity': '1'});
     $("#testLow").show().prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
     $("#testHigh").show().prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
@@ -148,7 +187,11 @@ const switchToPitchMatching = () => {
     currentPhase = 'pitchMatching';
     console.log('Hello from switch to pitchMatching');
     $('#startId').prop('disabled', false).css({'opacity': '1'});
-    $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    // $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'}).html("Sound 1");
+    $("#up").html("Sound 2").prop('disabled', false);
+    $("#down").html("Sound 1").prop('disabled', false);
+    $("#finish").css({'opacity': '0', 'cursor': 'not-allowed'});
+    
     addPitchMatchingInstructions();
 }
 
@@ -159,24 +202,26 @@ const handlePitchMatching = (event) => {
     } else if (event.target.id ==='up'){
         arrayIndex++
     }
-
+    console.log('Hello from handlePitchMatching')
     // TODO Need to save final frequencies (when the indices are equal)
     var tone1 = bracketFrequencies[arrayIndex];
     var amplitude1 = pitchMatchingAmplitude[arrayIndex];
     var tone2 = bracketFrequencies[endArrayIndex];
     var amplitude2 = pitchMatchingAmplitude[endArrayIndex];
-    if (pitchMatchingCounter < 2) {
+    if (pitchMatchingCounter < 3) {
         if (arrayIndex == endArrayIndex) {
             pitchMatchingCounter++; 
-            arrayIndex = 0;
+            pitchMatchResult.push({value: bracketFrequencies[arrayIndex], index: arrayIndex}); 
             endArrayIndex = bracketFrequencies.length - 1;
-            console.log(`handlePitchMatching with start ${arrayIndex} vs end ${endArrayIndex}`);
+            console.log(`handlePitchMatching with pitchMatchResult 
+                ${bracketFrequencies[arrayIndex]} at ${arrayIndex}`);
+            arrayIndex = 0;
             tone1 = bracketFrequencies[arrayIndex];
             amplitude1 = pitchMatchingAmplitude[arrayIndex];
             tone2 = bracketFrequencies[endArrayIndex];
             amplitude2 = pitchMatchingAmplitude[endArrayIndex];
         }
-        if (pitchMatchingCounter === 2) {
+        if (pitchMatchingCounter === 3) {
             switchToPitchRating();
         } else {
             playTwoSounds(tinnitusTypeMeasured, tinnitusTypeMeasured, soundEar, amplitude1, amplitude2, tone1, tone2);
@@ -191,7 +236,7 @@ const handleQualityMatching = (event) => {
         console.log(`handleQualityMatching with tinnitusTypeMeasured: ${tinnitusTypeMeasured}`);
         switchToCalibration();
     } else if (event.target.id ==='up'){
-        tinnitusTypeMeasured = 'Noise';
+        tinnitusTypeMeasured = 'Noisy';
         console.log(`handleQualityMatching with tinnitusTypeMeasured: ${tinnitusTypeMeasured}`);
         switchToCalibration();
     } else if (event.target.id === 'startId') {
@@ -213,7 +258,7 @@ const handlePitchRating = (event) => {
         $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+        // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     } else if (event.target.id === 'finish') {
         rating[frequencyIndex] = $('#rangeSlider').val();
         console.log(`Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`);
@@ -224,7 +269,7 @@ const handlePitchRating = (event) => {
             if (heardFrequencies[frequencyIndex]) {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-                playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+                playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
             } else {
                 console.log('recursively calling self')
                 // TODO is this the right thing to do?
@@ -235,7 +280,7 @@ const handlePitchRating = (event) => {
         // just play the same thing again
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+        playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     }
 }
 
@@ -253,7 +298,7 @@ const handleFinishAnswer = (event) => {
     const tone = bestTone.frequency
     const amplitude = pitchRatingAmplitude[ratingCount[bestTone.freqIndex]]
 
-    playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     $('#submitTinRating').prop('disabled', false)
 }
 
@@ -270,14 +315,10 @@ const addLevelMatchingInstructions = () => {
 }
 
 const addCalibrationInstructions = () => {
-    $("#instruct").html('Instructions: Set Up');
-    $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play a sound. </li>\
-                    <li>If your tinnitus is softer than the sound, click the \
-                        <strong> softer </strong> button. </li>\
-                    <li>If your tinnitus is louder than the sound or you can't hear the sound, click the <strong> louder </strong> button.</li>\
-                    <li style='color:firebrick'><strong>Do this until your find a sound that has the same (or very close) \
-                        loudness as your tinnitus.</strong></li>\
-                    <li>Then, click the <strong> Done </strong> button to play the next sound and do this again.</li><br>\
+    $("#instruct").html('Instructions: Set up for Multiple Pitches');
+    $("#startingInstr").html("<li id='Instructions'> Push <strong> Test 1 </strong> button to play a sound. </li>\
+                    <li>Use the <strong> Make Louder </strong> and <strong> Make Softer </strong> buttons to find a sound that is moderately soft</li>\
+                    <li>Click <strong> Calibration Complete </strong> when you are finished for each of the three test sounds. </li><br>\
                     <li>Note: You will see an orange circle while sound is playing.");
 }
 
@@ -299,6 +340,18 @@ const addPitchMatchingInstructions = () => {
                     <li style='color:firebrick'><strong>This procedure will repeat a number of times.</strong></li>\
                     <li>Note: You will see an orange circle while sound is playing.");
 }
+
+const addPitchRatingInstructions = () => {
+    $("#instruct").html('Instructions: Pitch Rating');
+    $("#startingInstr").html("<li id='Instructions'>In this phase of the experiment, we will measure\
+        the pitch of your tinnitus using a different procedure.</li>\
+    <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
+    <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
+    <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
+    <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
+    <li>Push <strong> Start </strong> when you are ready. </li><br>\
+    <li>Note: there are a total of 45 sounds in this section of the experiment.</li>");
+}
 // The following code sets  levels for all tones based on values set for calibration
 // low-frequency tones (500-1500) set to 500-Hz calibration amplitude
 // mid-frequency tones (2000-5000) set to 3000-Hz calibration
@@ -311,7 +364,7 @@ const addPitchMatchingInstructions = () => {
 
 //TODO Need to fix for final version
 
-    const setLevelsFrequencyRanges = () => {
+const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
     for (let step = 0; step < 2; step++) {   // 0 & 4
@@ -346,11 +399,11 @@ const addPitchMatchingInstructions = () => {
 
 const setUplevelMatching = () => {
     // remove the calibration test buttons
-    $('#testButtons>button').remove()
+    $('#testButtons>button').css({'opacity': '0'})
     $("#down").html('tinnitus is softer').prop('disabled', true);
     $("#up").html('tinnitus is louder').prop('disabled', true);
     $("#finish").html("Done").prop('disabled', true);
-    $('#startId').prop('disabled', false).css({'opacity': '1'});
+    $('#startId').prop('disabled', false).css({'opacity': '1', 'cursor' : 'pointer'});
     //Setting up new frequency range
 }
 
@@ -369,7 +422,7 @@ const setUpPitchAndQualityMatching = () => {
 
 const setUpPitchRating = () => {
     // remove the calibration test buttons
-    $('#testButtons>button').remove()
+    $('#testButtons').hide();
     // $("#testMid").remove();
     // $("#testLow").remove();
     // $("#testHigh").remove();
@@ -411,18 +464,19 @@ const switchToPitchRating = () => {
     currentPhase = 'pitchRating';
     $("button.answer").prop('disabled', true)
         .css({'cursor': 'not-allowed', 'opacity': '.1'});
-    $("#instruct").html('Instructions: Pitch Rating');
-    $("#startingInstr").html("<li id='Instructions'>In this last phase of the experiment, we will measure\
-            the pitch of your tinnitus using a different procedure.</li>\
-        <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
-        <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
-        <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
-        <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
-        <li>Push <strong> Start </strong> when you are ready. </li><br>\
-        <li>Note: there are a total of 45 sounds in this section of the experiment.</li>");
+    // $("#instruct").html('Instructions: Pitch Rating');
+    addPitchRatingInstructions();
+    // $("#startingInstr").html("<li id='Instructions'>In this last phase of the experiment, we will measure\
+    //         the pitch of your tinnitus using a different procedure.</li>\
+    //     <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
+    //     <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
+    //     <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
+    //     <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
+    //     <li>Push <strong> Start </strong> when you are ready. </li><br>\
+    //     <li>Note: there are a total of 45 sounds in this section of the experiment.</li>");
     $('#finish').prop('disabled',true).css({'opacity': '.1'});
     $('#startId').prop('disabled', false).css({'opacity': '1'});
-    $('#down').hide();
+    $('#down').css({'opacity': '0'});
     $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
@@ -450,7 +504,7 @@ const handleCalibrateAnswer = (event) => {
     testValues = testSettings[buttonId]
     // const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass]
     const amplitude = ampInit[testValues.calPass]
-    playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, buttonId)
+    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, testValues.tonef, buttonId)
     $("#finish").prop('disabled', false);
     $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
@@ -468,18 +522,32 @@ const handleCalibrateDone = () => {
     console.log(`the current is ${current.id}`, current)
 }
 
+const handleFinishSoundSelection = (event) => {
+    console.log('hello from handleFinishSoundSelection');
+    let amplitude = pitchRatingAmplitude[pitchMatchResult[1].index];
+    let tone = pitchMatchResult[1].value;
+    const selectedButton = $(event.target)
+    if (selectedButton.attr('id') != 'testLow') {
+        tone = tone / 2;  
+    }
+    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, testValues.tonef, buttonId)
+    $(event.target).addClass('played');
+    if ($('#testButtons button.played').length === 3) {
+        $('#finish').prop('disabled',false)
+    } 
+}
+
 
 const switchToCalibration = () => {
     currentPhase = 'calibrate';
     console.log('Hello from switch tocalibration');
-    // $('#testButtons>button').removeClass('is-invisible').show();
-    $("#ansButton1 button").hide();
-    $("#ansButton2 button").hide();
-    $("#testHigh").removeClass('is-invisible').show();
-    $("#testHigh").show();
-    // $("#testHigh").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-    // $("#testMid").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
-    // $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    $('#testButtons').removeClass('is-invisible').show();
+    $("#down").html("Make Softer").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    $("#up").html("Make Louder").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    $("#testHigh").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+    $("#testMid").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
+    $("#finish").show();
     addCalibrationInstructions();
 }
 
@@ -512,8 +580,8 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
             $('#'+buttonId).prop('disabled', false);
         }
         $("#finish").prop('disabled', false);
-        $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer'});
-        $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer'});
+        $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer', 'opacity' : '1'});
+        $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer', 'opacity' : '1'});
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
     });
 }
@@ -563,12 +631,12 @@ function playTwoSounds(tinnitusTypeS1, tinnitusTypeS2, ear, amplitude1, amplitud
     })
 }
 
-const handleCalibration = (buttonId) => {
-    console.log(`The clicked button has id ${buttonId}`)
+const handleCalibration = (event) => {
+    console.log(`The clicked button has id ${event.target.id}`, event)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-    testValues = testSettings[buttonId]
+    testValues = testSettings[event.target.id]
     const amplitude = ampInit[testValues.calPass] //TODO Need to resaerch what "Null" means in this context
-    playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, buttonId)
+    playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, event.target.id)
     $("#finish").prop('disabled', false);
     $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
@@ -577,8 +645,9 @@ const handleNoiseCalibration = (buttonId) => {
     console.log(`The clicked button has id ${buttonId}`)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testNoiseSettings[buttonId]
-    const amplitude = 1; 
-    // playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
+    const amplitude = ampInit[0]; 
+    console.log(`amplitude is ${amplitude}`)
+    playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
     $("#finish").prop('disabled', false);
     $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
@@ -619,7 +688,7 @@ const handleParticipantForm = () => {
                 $('#experiment').show();
                 $('footer.footer').show();
                 // ampInit
-                const value = participantData['hearingLoss'] === 'HL' ? 0.5 : 0.25;
+                const value = participantData['hearingLoss'] === 'HL' ? 0.1 : 0.001;
                 ampInit = Array(frequencies.length).fill(value);
             // })
             // .fail(() => {
@@ -673,6 +742,7 @@ const complete = () => {
     }
 }
 
+
 const answerPhaseFunction = {
     finish: handleFinishAnswer,
     calibrate: handleCalibrateAnswer,
@@ -688,13 +758,23 @@ const donePhaseFunction = {
     levelSet: handleLevelSetDone,
     pitchRating: handlePitchRating,
     // TODO delete this line cuz there is no Done button in pitch matching right?
-    //pitchMatching: handlePitchMatchingDone
+}
+
+const testButtonsFunctions = {
+    calibrate: handleCalibration,
+    finish: handleFinishSoundSelection   //TODO create this function.  Here add the played class and 
+    //test other buttons to see if they have class.  If true, enable calibrate button.  
 }
 
 $.when( $.ready ).then(() => {
     console.log("We are ready")
     handleParticipantForm();
     $("button.test").click((event) => {
+        event.preventDefault();
+        const handler = testButtonsFunctions[currentPhase]
+        handler(event)
+    });
+    $("button.testNoise").click((event) => {
         event.preventDefault();
         handleNoiseCalibration(event.target.id)
     });

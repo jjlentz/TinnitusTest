@@ -168,7 +168,7 @@
                                 <button id="testLow" class="button is-info test" disabled="true">Test 3</button>
                             </div>
                             <div id="testNoiseButton" class="cell is-col-span-4 has-text-centered">
-                                <button id="testNoise" class="button is-info test">Test Sound</button>
+                                <button id="testNoise" class="button is-info testNoise">Test Sound</button>
                             </div>
                             <div id="levelAtMax" class="cell is-col-span-4 has-text-centered" style="opacity: 0">
                                 <strong>Level At Maximum!<br>
@@ -195,13 +195,11 @@
                             </div>
                             <div class="cell is-col-span-4" >
                                 <form id="tinnitusRating" style="display: none">
-                                    <label>Rate the similarity of the final sound to your tinnitus
-                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="0"
+                                    <label>Rate the similarity your selected sound to your tinnitus
+                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="3" min="1"
                                                required placeholder=""/><br>
                                     </label>
-                                    <p>Use a number between 0 and 10. </p>
-                                    <p>0 = not at all similar to your tinnitus</p>
-                                    <p>10 = identical</p>
+                                    <p>Use a number between 1 and 13. </p>
                                     <button id="submitTinRating" class="button is-primary">Submit Rating</button>
                                 </form>
                             </div>
@@ -213,17 +211,17 @@
     </section>
 </main>
 <footer class="footer" style="display: none; padding-top: 1.5rem">
-    <h3 id="notes" class="is-4">Important Notes:</h3>
+    <h3 id="notes" class="is-4">Important Notes to Remember:</h3>
     <ul id="notesBullets">
         <li class="has-text-weight-semibold">Wear your earphones so that the sound plays in the ear
             opposite to your tinnitus or the ear with the weaker tinnitus.
         </li>
         <li class="has-text-weight-semibold">If your tinnitus is equal in both ears, listen to the sound in
             your right ear.
-        </li>
-        <li class="has-text-weight-semibold">Please do not adjust the volume on your computer after
-            the initial calibration in Test1, even if you cannot hear the sounds later in the experiment.
-        </li>
+        </li><br>
+    <div id="volumeInstructions" class="is-invisible">
+        <li class="has-text-weight-semibold">Remember please do not adjust the volume on your computer, even if you cannot hear the sounds later in the experiment. </li>
+    </div>
     </ul>
 </footer>
 </body>
