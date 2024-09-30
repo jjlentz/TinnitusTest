@@ -17,9 +17,9 @@ const testNoiseSettings = {
 }
 
 const frequencies = [
-    500, 1000, 3000, 4000, 8000,
-    500, 1000, 3000, 4000, 8000,
-    500, 1000, 3000, 4000, 8000];
+    2000, 4000, 8000,
+    2000, 4000, 8000,
+    2000, 4000, 8000];
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000]
@@ -29,7 +29,7 @@ const frequencies = [
     // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies];
 // let bracketFrequencies = frequencies.slice(0, frequencies.length / 3);  
-let bracketFrequencies = [500, 1000, 2000, 4000];
+let bracketFrequencies = [2000, 4000, 8000];
 // assume all frequencies will be heard, and only mark them otherwise if they are not.
 const heardFrequencies = Array(frequencies.length).fill(true);
 const pitchMatchResult = [];
@@ -72,12 +72,13 @@ const topThreeIndices = (arr) => {
 }
 
 const switchToFinalMatch = () => {
-    currentPhase = 'finish';
+    currentPhase = 'octaveTest';
     console.log('Hello from switchToFinalMatch')
     $("#instruct").html('Instructions: Final Pitch Test');
     $("#startingInstr").html("<li>Listen to each of these sounds</li> \
                             <li>After listening to them, type which sound best matched your tinnitus into the textbox.</li> \
-                            <li>Push the Submit button to store your answer.</li>");
+                            <li>Then, rate the similarity of that sound to your tinnitus. </li> \
+                            <li>Push the Submit button to store your answers.</li>");
     $("#ansButton1").remove();
     $("#ansButton2").remove();
     $('#testButtons').show();
@@ -89,18 +90,19 @@ const switchToFinalMatch = () => {
     $("#finish").remove();
     // sorting PitchMatchResult to establish most common value for the final pitch match, the middle one
     pitchMatchResult.sort((a, b) => b.value - a.value);  
-    // let lower = undefined;
-    // let higher = undefined; 
 
     const bestMatchedTone = pitchMatchResult[1];
     let lower = bestMatchedTone.value / 2;
     let higher = bestMatchedTone.value * 2;
-    if ((bestMatchedTone.index !== 0) && (bracketFrequencies.includes(lower) === false)) {
+    console.log(`best matched tone index, lower, higher ${bestMatchedTone.value} ${bestMatchedTone.index} ${lower} ${higher}`)
+    if ((bestMatchedTone.index === 0) || (bracketFrequencies.includes(lower) === false)) {
         lower = undefined;
+        $('#testLow').css({'opacity' : '0'}).addClass('played');  //If sound doesn't exist or isn't audible, hide and get played class
     } 
     
-    if ((bestMatchedTone.index !== bracketFrequencies.length - 1) && (bracketFrequencies.includes(higher) === false)) {
+    if ((bestMatchedTone.index === bracketFrequencies.length - 1) || (bracketFrequencies.includes(higher) === false)) {
         higher = undefined;
+        $('#testHigh').css({'opacity' : '0'}).addClass('played');  //If sound doesn't exist or isn't audible, hide and get played class
     } 
     
     if (bestMatchedTone.value === 8000) {
@@ -322,6 +324,18 @@ const addCalibrationInstructions = () => {
                     <li>Note: You will see an orange circle while sound is playing.");
 }
 
+const addRIInstructions = () => {
+    $("#instruct").html('Instructions: Residual Inhibition');
+    $("#startingInstr").html("<li id='Instructions'> Push one of the <strong> Sound </strong> button to play a sound. </li>\
+                    <li>This sound will play for one minute. </li>\
+                    <li>When the sound stops, you will be asked whether you hear your tinnitus anymore. </li>\
+                    <li>If you hear your tinnitus, you will be asked how much (a percentage)</li>\
+                    <li>You will be prompted to do this every 30 seconds until your tinnitus returns to 100% or 4 minutes have passed. </li>\
+                    <li>You will do this for three different sounds. </li><br>\
+                    <li>Note: This sound might be a bit loud. If you think it is hurting your ears, click the stop button and remove your earphones.  </li>\
+                    <li>Note: You will see an orange circle while sound is playing.");
+}
+
 const addQualityMatchingInstructions = () => {
     $("#instruct").html('Instructions: Quality Matching');
     $("#startingInstr").html("<li id='Instructions'> Push <strong> Start </strong> to play two sounds. </li>\
@@ -523,20 +537,60 @@ const handleCalibrateDone = () => {
 }
 
 const handleFinishSoundSelection = (event) => {
-    console.log('hello from handleFinishSoundSelection');
-    let amplitude = pitchRatingAmplitude[pitchMatchResult[1].index];
-    let tone = pitchMatchResult[1].value;
-    const selectedButton = $(event.target)
-    if (selectedButton.attr('id') != 'testLow') {
-        tone = tone / 2;  
-    }
-    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, testValues.tonef, buttonId)
+    const tone = $(event.target).attr('tone');
+    const toneIndex = frequencies.indexOf(Number(tone));
+    const amplitude = pitchRatingAmplitude[toneIndex];
+    console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
+    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     $(event.target).addClass('played');
+    $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
     if ($('#testButtons button.played').length === 3) {
-        $('#finish').prop('disabled',false)
+        $('#submitTinRating').prop('disabled',false)
+        // TODO check that fields have text upon button click
     } 
 }
 
+//TODO keep working on this to make sure that each sound is played once
+const handleResidualInhibition = (event) => {
+    console.log(`The clicked button has id ${event.target.id}`, event)
+    const tone = $(event.target).attr('tone');
+    const toneIndex = frequencies.indexOf(Number(tone));
+    const amplitude = pitchRatingAmplitude[toneIndex];
+
+    playOneSound('Noisy', soundEar, amplitude, tone, event.target.id)
+    $("#finish").prop('disabled', false);
+    $("#finish").css({'opacity': '1','cursor': 'pointer' });
+}
+
+const handleCalibration = (event) => {
+    console.log(`The clicked button has id ${event.target.id}`, event)
+    $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+    testValues = testSettings[event.target.id]
+    const amplitude = ampInit[testValues.calPass] //TODO Need to resaerch what "Null" means in this context
+    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, testValues.tonef, event.target.id)
+    $("#finish").prop('disabled', false);
+    $("#finish").css({'opacity': '1','cursor': 'pointer' });
+}
+
+const handleNoiseCalibration = (buttonId) => {
+    console.log(`The clicked button has id ${buttonId}`)
+    $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+    testValues = testNoiseSettings[buttonId]
+    const amplitude = ampInit[0]; 
+    console.log(`amplitude is ${amplitude}`)
+    playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
+    $("#finish").prop('disabled', false);
+    $("#finish").css({'opacity': '1','cursor': 'pointer' });
+}
+
+const switchToResidualInhibition = () => {
+    currentPhase = 'residualInhibition';
+    addRIInstructions();
+    $("#testButtons>button").prop('disabled', false).css({'opacity': '1'}).removeAttr('tone').removeClass('played');
+    $("#testHigh").attr('Tone','8000');
+    $("#testMid").attr('Tone','4000');
+    $("#testLow").attr('Tone','1000');
+}
 
 const switchToCalibration = () => {
     currentPhase = 'calibrate';
@@ -631,28 +685,6 @@ function playTwoSounds(tinnitusTypeS1, tinnitusTypeS2, ear, amplitude1, amplitud
     })
 }
 
-const handleCalibration = (event) => {
-    console.log(`The clicked button has id ${event.target.id}`, event)
-    $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-    testValues = testSettings[event.target.id]
-    const amplitude = ampInit[testValues.calPass] //TODO Need to resaerch what "Null" means in this context
-    playOneSound(participantData['tinnitusType'], soundEar, amplitude, testValues.tonef, event.target.id)
-    $("#finish").prop('disabled', false);
-    $("#finish").css({'opacity': '1','cursor': 'pointer' });
-}
-
-const handleNoiseCalibration = (buttonId) => {
-    console.log(`The clicked button has id ${buttonId}`)
-    $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-    testValues = testNoiseSettings[buttonId]
-    const amplitude = ampInit[0]; 
-    console.log(`amplitude is ${amplitude}`)
-    playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
-    $("#finish").prop('disabled', false);
-    $("#finish").css({'opacity': '1','cursor': 'pointer' });
-}
-
-
 const handleParticipantForm = () => {
     $('#participantForm').submit((event) => {
         event.preventDefault();
@@ -744,7 +776,7 @@ const complete = () => {
 
 
 const answerPhaseFunction = {
-    finish: handleFinishAnswer,
+    octaveTest: switchToResidualInhibition,
     calibrate: handleCalibrateAnswer,
     levelSet: handleLevelSet,
     pitchRating: handlePitchRating,
@@ -762,14 +794,15 @@ const donePhaseFunction = {
 
 const testButtonsFunctions = {
     calibrate: handleCalibration,
-    finish: handleFinishSoundSelection   //TODO create this function.  Here add the played class and 
-    //test other buttons to see if they have class.  If true, enable calibrate button.  
+    octaveTest: handleFinishSoundSelection,
+    residualInhibition: handleResidualInhibition
 }
 
 $.when( $.ready ).then(() => {
     console.log("We are ready")
     handleParticipantForm();
     $("button.test").click((event) => {
+        console.log(`The test button in phase with id ${currentPhase} ${event.target.id}`, event)
         event.preventDefault();
         const handler = testButtonsFunctions[currentPhase]
         handler(event)
@@ -796,8 +829,12 @@ $.when( $.ready ).then(() => {
         handler(event)
     })
     $('#submitTinRating').click((event) => {
-        event.preventDefault()
-        complete()
+        console.log(`submitTimeRating button clicked in phase ${currentPhase}`)
+        const handler = answerPhaseFunction[currentPhase]
+        handler(event)
+        //TODO where do I need this code?
+        // event.preventDefault()   
+        // complete()
     })
 });
 

@@ -195,11 +195,15 @@
                             </div>
                             <div class="cell is-col-span-4" >
                                 <form id="tinnitusRating" style="display: none">
-                                    <label>Rate the similarity your selected sound to your tinnitus
-                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="3" min="1"
+                                    <label>Which sound best matches your tinnitus?
+                                        <input type="number" id="tinnitusMatchedSoundField" maxlength="2" size="36" max="3" min="1"
                                                required placeholder=""/><br>
                                     </label>
-                                    <p>Use a number between 1 and 13. </p>
+                                    <label>Rate the similarity your selected sound to your tinnitus
+                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="1"
+                                               required placeholder=""/><br>
+                                    </label>
+                                    <p>Use a number between 1 and 10, where 10 is identical to your tinnitus. </p>
                                     <button id="submitTinRating" class="button is-primary">Submit Rating</button>
                                 </form>
                             </div>
