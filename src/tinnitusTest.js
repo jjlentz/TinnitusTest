@@ -541,9 +541,9 @@ const handleFinishSoundSelection = (event) => {
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
     console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
-    playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+    playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     $(event.target).addClass('played');
-    $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
+    // $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
     if ($('#testButtons button.played').length === 3) {
         $('#submitTinRating').prop('disabled',false)
         // TODO check that fields have text upon button click
@@ -556,10 +556,13 @@ const handleResidualInhibition = (event) => {
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
-
-    playOneSound('Noisy', soundEar, amplitude, tone, event.target.id)
-    $("#finish").prop('disabled', false);
-    $("#finish").css({'opacity': '1','cursor': 'pointer' });
+    $(event.target).addClass('played');
+    playTestButtonsSound('Noisy', soundEar, amplitude, tone, event.target.id);
+    if ($('#testButtons button.played').length === 3) {
+        complete();
+    }
+    // $("#finish").prop('disabled', false);
+    // $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
 
 const handleCalibration = (event) => {
@@ -585,6 +588,7 @@ const handleNoiseCalibration = (buttonId) => {
 
 const switchToResidualInhibition = () => {
     currentPhase = 'residualInhibition';
+    $('#ratingFormContainer').remove();
     addRIInstructions();
     $("#testButtons>button").prop('disabled', false).css({'opacity': '1'}).removeAttr('tone').removeClass('played');
     $("#testHigh").attr('Tone','8000');
@@ -639,6 +643,36 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
     });
 }
+
+function playTestButtonsSound(tinnitusType, ear, amplitude, tone, disabledButtonId) {
+    $('button').prop('disabled', true);
+    $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
+
+    const filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
+        
+    const source = `${filePrefix}${tone}.wav`
+    const howlOptions = {
+        src: [source],
+        html5: true
+    }
+    if (amplitude) {
+        howlOptions['volume'] = amplitude;
+    }
+    const sound = new Howl(howlOptions);
+
+    console.log(`Hello from playTestButtonSound with src ${source} ${tinnitusType}:${ear}:${amplitude}:${tone}`)
+    sound.play();
+
+    sound.on('end', () => {
+        // $("#finish").prop('disabled', false);
+        $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
+        $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+        if (disabledButtonId) {
+            $('#'+disabledButtonId).prop('disabled', true);
+        }
+    });
+}
+// TODO - need to ensure that only audible buttons (or buttons with a tone class) are displayed
 
 function playTwoSounds(tinnitusTypeS1, tinnitusTypeS2, ear, amplitude1, amplitude2, tone1, tone2, buttonId) {
     $('button').prop('disabled', true).css({'cursor': 'not-allowed'});
@@ -832,8 +866,7 @@ $.when( $.ready ).then(() => {
         console.log(`submitTimeRating button clicked in phase ${currentPhase}`)
         const handler = answerPhaseFunction[currentPhase]
         handler(event)
-        //TODO where do I need this code?
-        // event.preventDefault()   
+        event.preventDefault()   
         // complete()
     })
 });
