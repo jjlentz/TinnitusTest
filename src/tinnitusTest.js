@@ -75,8 +75,8 @@ const switchToFinalMatch = () => {
     currentPhase = 'octaveTest';
     console.log('Hello from switchToFinalMatch')
     $("#instruct").html('Instructions: Final Pitch Test');
-    $("#startingInstr").html("<li>Listen to each of these sounds</li> \
-                            <li>After listening to them, type which sound best matched your tinnitus into the textbox.</li> \
+    $("#startingInstr").html("<li>Click on each of the blue buttons to play a sound</li> \
+                            <li>After listening to each sound, type which sound best matched your tinnitus into the textbox.</li> \
                             <li>Then, rate the similarity of that sound to your tinnitus. </li> \
                             <li>Push the Submit button to store your answers.</li>");
     $("#ansButton1").remove();
@@ -86,7 +86,7 @@ const switchToFinalMatch = () => {
     $('#testMid').html('Sound 2').prop('disabled', false).css({'opacity' : '1', 'cursor': 'pointer'});
     $('#testLow').html('Sound 3').prop('disabled', false).css({'opacity' : '1', 'cursor': 'pointer'});
     $('#tinnitusRating').show();
-    $("#ratingSlider").remove();
+    $("#ratingSlider").hide();
     $("#finish").remove();
     // sorting PitchMatchResult to establish most common value for the final pitch match, the middle one
     pitchMatchResult.sort((a, b) => b.value - a.value);  
@@ -94,23 +94,22 @@ const switchToFinalMatch = () => {
     const bestMatchedTone = pitchMatchResult[1];
     let lower = bestMatchedTone.value / 2;
     let higher = bestMatchedTone.value * 2;
-    console.log(`best matched tone index, lower, higher ${bestMatchedTone.value} ${bestMatchedTone.index} ${lower} ${higher}`)
-    if ((bestMatchedTone.index === 0) || (bracketFrequencies.includes(lower) === false)) {
-        lower = undefined;
-        $('#testLow').css({'opacity' : '0'}).addClass('played');  //If sound doesn't exist or isn't audible, hide and get played class
-    } 
-    
-    if ((bestMatchedTone.index === bracketFrequencies.length - 1) || (bracketFrequencies.includes(higher) === false)) {
-        higher = undefined;
-        $('#testHigh').css({'opacity' : '0'}).addClass('played');  //If sound doesn't exist or isn't audible, hide and get played class
-    } 
-    
     if (bestMatchedTone.value === 8000) {
         higher = 12000;
     } else if (bestMatchedTone.value === 750) {
         lower = 500;
     }
+    console.log(`best matched tone index, lower, higher ${bestMatchedTone.value} ${bestMatchedTone.index} ${lower} ${higher}`)
+    if ((bestMatchedTone.index === 0) || (bracketFrequencies.includes(lower) === false)) {
+        lower = undefined;
+        $('#testLow').css({'opacity' : '0'}).addClass('played').addClass('notAudible');  //If sound doesn't exist or isn't audible, hide and get played class
+    } 
     
+    if ((bestMatchedTone.index === bracketFrequencies.length - 1) || (bracketFrequencies.includes(higher) === false)) {
+        higher = undefined;
+        $('#testHigh').css({'opacity' : '0'}).addClass('played').addClass('notAudible');  //If sound doesn't exist or isn't audible, hide and get played class
+    } 
+
     $('#testLow').attr('tone',lower);
     $('#testMid').attr('tone',bestMatchedTone.value);
     $('#testHigh').attr('tone',higher);
@@ -271,7 +270,8 @@ const handlePitchRating = (event) => {
             if (heardFrequencies[frequencyIndex]) {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-                playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+///JJL TODO put back int                //playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+                $('#finish').prop('disabled',false);
             } else {
                 console.log('recursively calling self')
                 // TODO is this the right thing to do?
@@ -282,7 +282,8 @@ const handlePitchRating = (event) => {
         // just play the same thing again
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-        playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+///JJL TODO put back int        // playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+        $('#finish').prop('disabled',false);
     }
 }
 
@@ -326,12 +327,12 @@ const addCalibrationInstructions = () => {
 
 const addRIInstructions = () => {
     $("#instruct").html('Instructions: Residual Inhibition');
-    $("#startingInstr").html("<li id='Instructions'> Push one of the <strong> Sound </strong> button to play a sound. </li>\
+    $("#startingInstr").html("<li id='Instructions'> Push one of the <strong> Sound </strong> buttons to play a sound. </li>\
                     <li>This sound will play for one minute. </li>\
-                    <li>When the sound stops, you will be asked whether you hear your tinnitus anymore. </li>\
-                    <li>If you hear your tinnitus, you will be asked how much (a percentage)</li>\
+                    <li>When the sound stops, you will be asked what percentage of your tinnitus is left. </li>\
+                    <li>The scale is 0% (no tinnitus) to 100% (tinnitus is the same as before the sound) </li>\
                     <li>You will be prompted to do this every 30 seconds until your tinnitus returns to 100% or 4 minutes have passed. </li>\
-                    <li>You will do this for three different sounds. </li><br>\
+                    <li>Do this for each of the sound buttons. </li><br>\
                     <li>Note: This sound might be a bit loud. If you think it is hurting your ears, click the stop button and remove your earphones.  </li>\
                     <li>Note: You will see an orange circle while sound is playing.");
 }
@@ -480,14 +481,6 @@ const switchToPitchRating = () => {
         .css({'cursor': 'not-allowed', 'opacity': '.1'});
     // $("#instruct").html('Instructions: Pitch Rating');
     addPitchRatingInstructions();
-    // $("#startingInstr").html("<li id='Instructions'>In this last phase of the experiment, we will measure\
-    //         the pitch of your tinnitus using a different procedure.</li>\
-    //     <li>Push <strong> Play </strong> (as many times as you want) to hear a sound.</li>\
-    //     <li>Rate the similarity of the pitch of that sound to the pitch of your tinnitus using the slider.</li>\
-    //     <li>Push <strong> Done </strong> button when you satisfied with your rating and a new sound will play. </li>\
-    //     <li>If you can't hear the sound, drag the slider all the way to the left. </li><br>\
-    //     <li>Push <strong> Start </strong> when you are ready. </li><br>\
-    //     <li>Note: there are a total of 45 sounds in this section of the experiment.</li>");
     $('#finish').prop('disabled',true).css({'opacity': '.1'});
     $('#startId').prop('disabled', false).css({'opacity': '1'});
     $('#down').css({'opacity': '0'});
@@ -537,11 +530,12 @@ const handleCalibrateDone = () => {
 }
 
 const handleFinishSoundSelection = (event) => {
+    //This is the octave test
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
     console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
-    playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+    playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, TONE_DURATION, null)
     $(event.target).addClass('played');
     // $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
     if ($('#testButtons button.played').length === 3) {
@@ -556,11 +550,15 @@ const handleResidualInhibition = (event) => {
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
+    const duration = 60; // a 60-sec sound 
     $(event.target).addClass('played');
-    playTestButtonsSound('Noisy', soundEar, amplitude, tone, event.target.id);
-    if ($('#testButtons button.played').length === 3) {
-        complete();
-    }
+    playTestButtonsSound('Noisy', soundEar, amplitude, tone, duration, event.target.id);
+    let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
+    //TODO Needs to get the timer in here
+    // Need to put this after all data collection complete
+    // if ($('#testButtons button.played').length === 3) {
+    //     complete();
+    // }
     // $("#finish").prop('disabled', false);
     // $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
@@ -590,10 +588,34 @@ const switchToResidualInhibition = () => {
     currentPhase = 'residualInhibition';
     $('#ratingFormContainer').remove();
     addRIInstructions();
-    $("#testButtons>button").prop('disabled', false).css({'opacity': '1'}).removeAttr('tone').removeClass('played');
-    $("#testHigh").attr('Tone','8000');
-    $("#testMid").attr('Tone','4000');
-    $("#testLow").attr('Tone','1000');
+    $("#testButtons>button").removeAttr('tone');
+    // TODO Maybe stu can fix this" ?
+    // If audible, display buttons and get a new tone attribute
+    if (bracketFrequencies.indexOf(8000) != -1) {
+        $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+    } else {
+        $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '0'});
+    }
+    if (bracketFrequencies.indexOf(4000) != -1) {
+        $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+    } else {
+        $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '0'});
+    }
+    if (bracketFrequencies.indexOf(1000) != -1) {
+        $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+    } else {
+        $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '0'});
+    }
+
+    // $('#ratingSlider').show();
+    // $('#0').html('0%');
+    // $('#25').html('25%');
+    // $('#50').html('50%');
+    // $('#75').html('75%');
+    // $('#100').html('100%');
+    // $('#finish').show().prop('disabled',true).css({'opacity': '1'}).html('Submit percentage');
+    
+
 }
 
 const switchToCalibration = () => {
@@ -644,12 +666,26 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
     });
 }
 
-function playTestButtonsSound(tinnitusType, ear, amplitude, tone, disabledButtonId) {
+function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, disabledButtonId) {
     $('button').prop('disabled', true);
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
 
+    console.log('duration = ', duration);
+    if (duration == 2) {
+        console.log('duration = passed');
+    } else {
+        console.log('duration failed');
+    }    
+
+    // TODO Doesn't work corectly
     const filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
-        
+    if (duration == 2) {
+        filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
+        console.log('duration passed');
+    } else {
+        filePrefix = ear + 'wavNoise60sec.wav';
+    }    
+
     const source = `${filePrefix}${tone}.wav`
     const howlOptions = {
         src: [source],
@@ -666,6 +702,8 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, disabledButton
     sound.on('end', () => {
         // $("#finish").prop('disabled', false);
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
+        // NEed to only enable buttons that are audible
+        $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
         $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
         if (disabledButtonId) {
             $('#'+disabledButtonId).prop('disabled', true);
