@@ -1,3 +1,4 @@
+"use strict";
 const TONE_DURATION = 2
 let participantData = {};
 let startTime = 0;
@@ -42,6 +43,7 @@ for (let step = 0; step < ratingsFrequencies.length; step++) {
 }
 
 // will be initialized later
+let step = null;
 let ampInit = null;
 let frequencyIndex = 0;
 let arrayIndex = 0;
@@ -118,7 +120,6 @@ const switchToFinalMatch = () => {
 const handleLevelSetDone = (event) => {
     console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
     if (frequencyIndex === (frequencies.length - 1)) {
-        console.log('switchToPitchRating')
         switchToPitchMatching()
     } else {
         const amplitude = ampInit[++frequencyIndex]
@@ -477,12 +478,13 @@ const beginLevelMatching = () => {
 
 const switchToPitchRating = () => {
     currentPhase = 'pitchRating';
+    $('#ansButton1').remove();
+    $('#ansButton2').removeClass('is-col-span-2').addClass('is-col-span-4')
     $("button.answer").prop('disabled', true)
         .css({'cursor': 'not-allowed', 'opacity': '.1'});
-    // $("#instruct").html('Instructions: Pitch Rating');
     addPitchRatingInstructions();
     $('#finish').prop('disabled',true).css({'opacity': '.1'});
-    $('#startId').prop('disabled', false).css({'opacity': '1'});
+    $('#startId').prop('disabled', false).css({'opacity': '0'});
     $('#down').css({'opacity': '0'});
     $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
     $('#ratingSlider').show();
@@ -530,7 +532,7 @@ const handleCalibrateDone = () => {
 }
 
 const handleFinishSoundSelection = (event) => {
-    //This is the octave test
+    //This is the octave test - set in switchtoFinalPitchMatch
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
@@ -540,7 +542,7 @@ const handleFinishSoundSelection = (event) => {
     // $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
     if ($('#testButtons button.played').length === 3) {
         $('#submitTinRating').prop('disabled',false)
-        // TODO check that fields have text upon button click
+        // TODO check that fields have text upon button click - Stu needs to do
     } 
 }
 
@@ -550,7 +552,7 @@ const handleResidualInhibition = (event) => {
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
-    const duration = 60; // a 60-sec sound 
+    const duration = 2; // a 60-sec sound 
     $(event.target).addClass('played');
     playTestButtonsSound('Noisy', soundEar, amplitude, tone, duration, event.target.id);
     let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
@@ -594,17 +596,17 @@ const switchToResidualInhibition = () => {
     if (bracketFrequencies.indexOf(8000) != -1) {
         $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
     } else {
-        $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '0'});
+        $("#testHigh").attr('tone','8000').prop('disabled', true).css({'opacity': '0'});
     }
     if (bracketFrequencies.indexOf(4000) != -1) {
         $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
     } else {
-        $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '0'});
+        $("#testMid").attr('tone','4000').prop('disabled', true).css({'opacity': '0'});
     }
     if (bracketFrequencies.indexOf(1000) != -1) {
         $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
     } else {
-        $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '0'});
+        $("#testLow").attr('tone','1000').prop('disabled', true).css({'opacity': '0'});
     }
 
     // $('#ratingSlider').show();
@@ -670,21 +672,22 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, disa
     $('button').prop('disabled', true);
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
 
-    console.log('duration = ', duration);
-    if (duration == 2) {
-        console.log('duration = passed');
-    } else {
-        console.log('duration failed');
-    }    
+    console.log(`duration and disabledButtonId ${duration} ${disabledButtonId}`);
+    // if (duration == 2) {
+    //     console.log('duration = passed');
+    // } else {
+    //     console.log('duration failed');
+    // }    
 
     // TODO Doesn't work corectly
     const filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
-    if (duration == 2) {
-        filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
-        console.log('duration passed');
-    } else {
-        filePrefix = ear + 'wavNoise60sec.wav';
-    }    
+    // let filePrefix = null;
+    // if (duration == 2) {
+    //     filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
+    //     console.log('duration passed');
+    // } else {
+    //     filePrefix = ear + 'wavNoise60sec';
+    // }    
 
     const source = `${filePrefix}${tone}.wav`
     const howlOptions = {
@@ -700,13 +703,13 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, disa
     sound.play();
 
     sound.on('end', () => {
-        // $("#finish").prop('disabled', false);
+        $("#finish").prop('disabled', false);
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
         // NEed to only enable buttons that are audible
         $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-        $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+        $('#testButtons>button.notAudible').prop('disabled', true).css({'opacity': '0'});
         if (disabledButtonId) {
-            $('#'+disabledButtonId).prop('disabled', true);
+            $('#'+disabledButtonId).prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
         }
     });
 }
