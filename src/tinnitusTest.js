@@ -18,9 +18,9 @@ const testNoiseSettings = {
 }
 
 const frequencies = [
-    2000, 4000, 8000,
-    2000, 4000, 8000,
-    2000, 4000, 8000];
+    500, 2000, 3000, 4000, 8000,
+    500, 2000, 3000, 4000, 8000,
+    500, 2000, 3000, 4000, 8000];
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000]
@@ -96,6 +96,7 @@ const switchToFinalMatch = () => {
     const bestMatchedTone = pitchMatchResult[1];
     let lower = bestMatchedTone.value / 2;
     let higher = bestMatchedTone.value * 2;
+    //TODO I think this is working correctly but should verify
     if (bestMatchedTone.value === 8000) {
         higher = 12000;
     } else if (bestMatchedTone.value === 750) {
@@ -104,12 +105,12 @@ const switchToFinalMatch = () => {
     console.log(`best matched tone index, lower, higher ${bestMatchedTone.value} ${bestMatchedTone.index} ${lower} ${higher}`)
     if ((bestMatchedTone.index === 0) || (bracketFrequencies.includes(lower) === false)) {
         lower = undefined;
-        $('#testLow').css({'opacity' : '0'}).addClass('played').addClass('notAudible');  //If sound doesn't exist or isn't audible, hide and get played class
+        $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
     } 
     
     if ((bestMatchedTone.index === bracketFrequencies.length - 1) || (bracketFrequencies.includes(higher) === false)) {
         higher = undefined;
-        $('#testHigh').css({'opacity' : '0'}).addClass('played').addClass('notAudible');  //If sound doesn't exist or isn't audible, hide and get played class
+        $('#testHigh').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
     } 
 
     $('#testLow').attr('tone',lower);
@@ -124,14 +125,13 @@ const handleLevelSetDone = (event) => {
     } else {
         const amplitude = ampInit[++frequencyIndex]
         const tone = frequencies[frequencyIndex]
-        // TODO JJL PUT BACK IN
-        // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+        playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     }
 }
 
 const handleLevelSet = (event) => {
     console.log('Hello from handleLevelSet');
-    $('#startId').prop('disabled', false).css({'opacity': '1'});
+    $('#startId').prop('disabled', true).css({'opacity': '0'});
     $('#finish').prop('disabled', false).css({'opacity': '1'});
         if (event.target.id === 'up') {
         let maxVolume = parseInt($(event.currentTarget).attr('maxvolume'));
@@ -192,7 +192,7 @@ const switchToPitchMatching = () => {
     // $("#testLow").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'}).html("Sound 1");
     $("#up").html("Sound 2").prop('disabled', false);
     $("#down").html("Sound 1").prop('disabled', false);
-    $("#finish").css({'opacity': '0', 'cursor': 'not-allowed'});
+    $("#finish").prop('disabled ', true).css({'opacity': '0', 'cursor': 'not-allowed'});
     
     addPitchMatchingInstructions();
 }
@@ -242,14 +242,13 @@ const handleQualityMatching = (event) => {
         console.log(`handleQualityMatching with tinnitusTypeMeasured: ${tinnitusTypeMeasured}`);
         switchToCalibration();
     } else if (event.target.id === 'startId') {
-        const tone = 1000;
+        const tone = 2000;
         const frequencyIndex = bracketFrequencies.indexOf(tone)
         console.log("Hello from handleQualityMatching - after ifs");
         console.log('bracketFrequencies', bracketFrequencies);
         const amplitude = pitchMatchingAmplitude[frequencyIndex];
         console.log(`frequencyIndex: ${frequencyIndex}, pitchMatchingAmplitude: ${pitchMatchingAmplitude}`)
         playTwoSounds('Tonal', 'Noisy', soundEar, amplitude / 6, amplitude, tone, tone);
-    // TODO JJL needs to fix playtwosounds routing to handle two different sounds
     }
  }
 
@@ -271,7 +270,7 @@ const handlePitchRating = (event) => {
             if (heardFrequencies[frequencyIndex]) {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-///JJL TODO put back int                //playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+                playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
                 $('#finish').prop('disabled',false);
             } else {
                 console.log('recursively calling self')
@@ -283,7 +282,7 @@ const handlePitchRating = (event) => {
         // just play the same thing again
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-///JJL TODO put back int        // playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
+        playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
         $('#finish').prop('disabled',false);
     }
 }
@@ -490,7 +489,6 @@ const switchToPitchRating = () => {
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
     frequencyIndex = 0;
-    //TODO JJL Take out and rename amplitude values for pitch rating after pitch matching works
     for (step = 0; step < pitchRatingAmplitude.length; step++) {
         pitchRatingAmplitude[step] =
             (ampInit[step]
@@ -539,7 +537,7 @@ const handleFinishSoundSelection = (event) => {
     console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
     playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, TONE_DURATION, null)
     $(event.target).addClass('played');
-    // $("#testButtons>button").prop('disabled', false);   //TODO Need to figure out how to enable only the correct buttons
+    // $("#testButtons>button").prop('disabled', false);   //seems to be working ok this way. 
     if ($('#testButtons button.played').length === 3) {
         $('#submitTinRating').prop('disabled',false)
         // TODO check that fields have text upon button click - Stu needs to do
@@ -556,7 +554,7 @@ const handleResidualInhibition = (event) => {
     $(event.target).addClass('played');
     playTestButtonsSound('Noisy', soundEar, amplitude, tone, duration, event.target.id);
     let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
-    //TODO Needs to get the timer in here
+    //TODO Need to get the timer in here
     // Need to put this after all data collection complete
     // if ($('#testButtons button.played').length === 3) {
     //     complete();
@@ -590,31 +588,24 @@ const switchToResidualInhibition = () => {
     currentPhase = 'residualInhibition';
     $('#ratingFormContainer').remove();
     addRIInstructions();
-    $("#testButtons>button").removeAttr('tone');
-    // TODO Maybe stu can fix this" ?
-    // If audible, display buttons and get a new tone attribute
+    $("#testButtons>button").removeAttr('tone').removeClass('notAudible');
+    // TODO Maybe stu can fix this" so it isn't so messy 
     if (bracketFrequencies.indexOf(8000) != -1) {
-        $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+        $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
     } else {
-        $("#testHigh").attr('tone','8000').prop('disabled', true).css({'opacity': '0'});
+        $("#testHigh").attr('tone','8000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
     }
     if (bracketFrequencies.indexOf(4000) != -1) {
-        $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+        $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
     } else {
-        $("#testMid").attr('tone','4000').prop('disabled', true).css({'opacity': '0'});
+        $("#testMid").attr('tone','4000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
     }
     if (bracketFrequencies.indexOf(1000) != -1) {
-        $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '1'}).removeClass('played');
+        $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
     } else {
-        $("#testLow").attr('tone','1000').prop('disabled', true).css({'opacity': '0'});
+        $("#testLow").attr('tone','1000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
     }
 
-    // $('#ratingSlider').show();
-    // $('#0').html('0%');
-    // $('#25').html('25%');
-    // $('#50').html('50%');
-    // $('#75').html('75%');
-    // $('#100').html('100%');
     // $('#finish').show().prop('disabled',true).css({'opacity': '1'}).html('Submit percentage');
     
 
@@ -679,7 +670,7 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, disa
     //     console.log('duration failed');
     // }    
 
-    // TODO Doesn't work corectly
+    // TODO Doesn't work corectly.  Is not playing correct sounds when selected based on duration.  Also, RI phase is playing a noisy sound
     const filePrefix = tinnitusType === "Noisy" ? ear + 'wavNoise' : ear + 'wav';
     // let filePrefix = null;
     // if (duration == 2) {
@@ -707,7 +698,7 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, disa
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
         // NEed to only enable buttons that are audible
         $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-        $('#testButtons>button.notAudible').prop('disabled', true).css({'opacity': '0'});
+        $('#testButtons>button.notAudible').prop('disabled', true).css({'opacity': '0', 'cursor': 'none'});
         if (disabledButtonId) {
             $('#'+disabledButtonId).prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
         }
@@ -838,15 +829,16 @@ const submitExperimentResults = (tinitusRating) => {
 const complete = () => {
     const tinitusRating = $('#tinnitusRatingField').val();
     console.log(`tinitusRating is ${tinitusRating}`)
-    if (tinitusRating !== '') {
-        $("#up").remove();
-        $("#instruct").html('Thank you.  You are done!');
-        $("#startingInstr").remove();
-        $('#tinnitusRating').remove();
-        submitExperimentResults(tinitusRating);
-    } else {
-        $("#startingInstr").append('<li class="important">Rating is required</li>')
-    }
+    // TODO put back in
+    // if (tinitusRating !== '') {
+    //     $("#up").remove();
+    //     $("#instruct").html('Thank you.  You are done!');
+    //     $("#startingInstr").remove();
+    //     $('#tinnitusRating').remove();
+    //     submitExperimentResults(tinitusRating);
+    // } else {
+    //     $("#startingInstr").append('<li class="important">Rating is required</li>')
+    // }
 }
 
 
@@ -860,6 +852,7 @@ const answerPhaseFunction = {
 }
 
 const donePhaseFunction = {
+    octaveTest: switchToResidualInhibition,
     calibrate: handleCalibrateDone,
     calibrateNoise: switchToQualityMatching,
     levelSet: handleLevelSetDone,
