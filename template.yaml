@@ -102,7 +102,7 @@ Resources:
     Properties:
       DistributionConfig:
         Comment: 'Experiment html file'
-        DefaultRootObject: "index.html"
+        DefaultRootObject: "tintest.html"
         Enabled: true
         HttpVersion: http2
         Origins:

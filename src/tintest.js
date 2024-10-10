@@ -1,7 +1,7 @@
 const tonedur = 2; //duration of the tones to be played
-var count = 0;  //general counter
-var butcount = 0;  //counter for buttons in pitch comparison task
-var expcount = 'calibrate';
+let count = 0;  //general counter
+//var butcount = 0;  //counter for buttons in pitch comparison task
+let expcount = 'calibrate';
 // var expcount = 'pitchbracket2';
 
 var tonef = 0; 
@@ -19,14 +19,14 @@ var tinType;
 var calPass;
 
 
-var frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
-// , 250, 500, 750, 1000, 1500, 2000, 
-//     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
-var frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 1500, 4000, 2000, 3000]; 
-var rfreqs = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000,
-     3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+const frequencies = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
+    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
+    250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+const frequenciesbracket = [250, 8000, 500, 7000, 750, 6000, 1000, 5000, 1500, 4000, 2000, 3000];
+const rfreqs = [250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000,
+    3000, 4000, 5000, 6000, 7000, 8000, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
 // var rfreqs = [250, 1000, 3000, 7000];
-var bracketcount = [0, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];  //counter for shuffled frequencies
+// const bracketcount = [0, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];  //counter for shuffled frequencies
 //mapconst mapindex=[0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12];  //Need for amplitude values for bracket2 procedure
 
 let bracketMap = new Map();
@@ -178,8 +178,8 @@ $.when( $.ready ).then(() => {
         if (HL === "HL") {
             for (step = 0; step < frequencies.length; step++) {
             ampInit[step] = 0.5;
-            };
-        };
+            }
+        }
 
         eDescrip = $('#earphoneDescrip').val();
         if (tinEar === "Right"){
@@ -188,27 +188,29 @@ $.when( $.ready ).then(() => {
             soundEar = "R";
         } else {
             soundEar = "S";
-        };
+        }
 
-        $.ajax({
-            type: 'POST',
-            url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
-            dataType: 'json',
-            data: {participantId: pid, browser: navigator.userAgent}
-        })
-        .done((response) => {
-            startTime = response.startTime;
+        // $.ajax({
+        //     type: 'POST',
+        //     url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
+        //     dataType: 'json',
+        //     data: {participantId: pid, browser: navigator.userAgent}
+        // })
+        // .done((response) => {
+        //     startTime = response.startTime;
             $('#participantForm').hide();
             $('#experimentRow').show();
-        })
-        .fail(() => {
-            $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
-        });
+        // })
+        // .fail(() => {
+        //     $('#participantForm').append('<div class="badParticipant">The Participant Id is not valid</div>');
+        // });
     });
-    $("button.test").click(() => {
-        const calibrateMid = event.target.id === "testMid";
-        const calibrateLow = event.target.id === "testLow";
-        const calibrateHigh = event.target.id === "testHigh";
+    $("button.test").click((event) => {
+        const clicked = event.target.id
+        console.log(`The clicked button has id ${clicked}`)
+        const calibrateMid = clicked === "testMid";
+        const calibrateLow = clicked === "testLow";
+        const calibrateHigh = clicked === "testHigh";
         // ampForPlayFunction = 0.005;
 
         // $("#ansButtons button").prop('disabled', false).css({'opacity': '1','cursor': 'pointer' });
@@ -234,7 +236,7 @@ $.when( $.ready ).then(() => {
             $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
             ampForPlayFunction = ampInit[calPass];
       
-        };
+        }
 
 
         //tonef = 3000;
@@ -446,6 +448,7 @@ $.when( $.ready ).then(() => {
             twoSounds = false;
             const ansSofter = event.target.id === "down";
             const ansLouder = event.target.id === "up";
+            console.log(`ansSofter ${ansSofter} + ansLouder ${ansLouder} + expcount ${expcount}`)
             if (ansSofter) {
                 switch (expcount) {
                     case "calibrate":
@@ -542,7 +545,7 @@ $.when( $.ready ).then(() => {
     });
 
     $("#finish").click(() => {
-        //console.log("finish",expcount)
+        console.log(`finish with expcount ${expcount} and calPass ${calPass}`)
  
             $("#levelAtMax").css({'opacity': '0'});
             switch (expcount) {
@@ -674,7 +677,7 @@ $.when( $.ready ).then(() => {
                             $("#finish").prop('disabled', false); // Turning on the button while playing
                             $("#ansButtons button").prop('disabled', false); // Turning on the button while playing
                             $("#soundIndicator").css({'opacity': '0'}); // Turning on the button while playing
-                            //console.log('test case')
+                            console.log('test case')
                         }, tonedur * 1000);
                     }
                 //};
@@ -717,7 +720,7 @@ $.when( $.ready ).then(() => {
             case "pitch_rating":  //This is the rating section
                 //if (confirm("Confirm your response")){
                     rating[count] = document.getElementById("rangeSlider").value;
-                    //console.log(rating,count)
+                    console.log(rating,count)
                     count++
                     tonef = rfreqs[count];
                     ampForPlayFunction = amp[ratingcount[count]];
@@ -760,7 +763,7 @@ function playSound() {
             $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
         }, 250);
 
-        // console.log(count,tonef,ampForPlayFunction)
+        console.log(count,tonef,ampForPlayFunction)
         
         if (tinType === "Noisy"){
             filesnd = [soundEar + 'Noise'];
@@ -773,7 +776,7 @@ function playSound() {
              html5: true // Force to HTML5 so that the audio can stream in (best for large files).
             });
     
-        //console.log(sound)
+        console.log(sound)
         Howler.volume(ampForPlayFunction)
         sound.play();
         //wait();
@@ -853,7 +856,7 @@ const submitExperimentResults = () => {
         data: myData
     }).done(() => {
         console.log('DATA SAVED');
-        //console.log(myData)
+        console.log(myData)
     }).fail((err) => {
         console.error('Data not saved', err);
         $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");
