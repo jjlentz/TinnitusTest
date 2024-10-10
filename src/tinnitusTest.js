@@ -9,10 +9,10 @@ let testValues = null;
 const tinnutusReports = []
 const testSettings = {
     testLow: {tonef: 500, calPass: 0},
-    //testMid: {tonef: 3000, calPass: 4},
-    testMid: {tonef: 3000, calPass: 2},
-    //testHigh: {tonef: 8000, calPass: 9},
-    testHigh: {tonef: 8000, calPass: 4},
+    testMid: {tonef: 3000, calPass: 4},
+    // testMid: {tonef: 3000, calPass: 2},
+    testHigh: {tonef: 8000, calPass: 9},
+    // testHigh: {tonef: 8000, calPass: 4},
 }
 
 const testNoiseSettings = {
@@ -20,16 +20,16 @@ const testNoiseSettings = {
 }
 
 const frequencies = [
-    500, 2000, 3000, 4000, 8000,
-    500, 2000, 3000, 4000, 8000,
-    500, 2000, 3000, 4000, 8000];
+    // 500, 2000, 3000, 4000, 8000,
+    // 500, 2000, 3000, 4000, 8000,
+    // 500, 2000, 3000, 4000, 8000];
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000,
     // 500, 1500, 3000, 5000, 7000, 8000, 12000]
-    // //|                      |                             |
-    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
-    // 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
+    //|                      |                             |
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
+    500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies];
 let bracketFrequencies = frequencies.slice(0, frequencies.length / 3);
 //let bracketFrequencies = [2000, 4000, 8000];
@@ -123,7 +123,7 @@ const switchToFinalMatch = () => {
 }
 
 const handleLevelSetDone = (event) => {
-    console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`, event)
+    console.log(`handleLevelSet with frequencyIndex ${frequencyIndex}`)
     if (frequencyIndex === (frequencies.length - 1)) {
         switchToPitchMatching()
     } else {
@@ -178,6 +178,7 @@ const switchToQualityMatching = () => {
     $("#testHigh").show().prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
     addQualityMatchingInstructions();
     setUpPitchAndQualityMatching();  //This sets up the buttons only
+    prepPitchMatchingAmplitudes();
 }
 
 const prepPitchMatchingAmplitudes = () => {
@@ -200,7 +201,7 @@ const switchToPitchMatching = () => {
     $("#down").html("Sound 1").prop('disabled', false);
     $("#finish").prop('disabled ', true).css({'opacity': '0', 'cursor': 'not-allowed'});
     addPitchMatchingInstructions();
-    prepPitchMatchingAmplitudes();
+    // prepPitchMatchingAmplitudes();
 }
 
 const handlePitchMatching = (event) => {
@@ -221,8 +222,8 @@ const handlePitchMatching = (event) => {
             pitchMatchingCounter++; 
             pitchMatchResult.push({value: bracketFrequencies[arrayIndex], index: arrayIndex}); 
             endArrayIndex = bracketFrequencies.length - 1;
-            console.log(`handlePitchMatching with pitchMatchResult 
-                ${bracketFrequencies[arrayIndex]} at ${arrayIndex}`);
+            // console.log(`handlePitchMatching with pitchMatchResult 
+            //     ${bracketFrequencies[arrayIndex]} at ${arrayIndex}`);
             arrayIndex = 0;
             tone1 = bracketFrequencies[arrayIndex];
             amplitude1 = pitchMatchingAmplitude[arrayIndex];
@@ -250,7 +251,7 @@ const handleQualityMatching = (event) => {
     } else if (event.target.id === 'startId') {
         const tone = 2000;
         const frequencyIndex = bracketFrequencies.indexOf(tone)
-        console.log("Hello from handleQualityMatching - after ifs");
+        // console.log("Hello from handleQualityMatching - after ifs");
         console.log('bracketFrequencies', bracketFrequencies);
         const amplitude = pitchMatchingAmplitude[frequencyIndex];
         console.log(`frequencyIndex: ${frequencyIndex}, pitchMatchingAmplitude: ${pitchMatchingAmplitude}`)
@@ -259,7 +260,7 @@ const handleQualityMatching = (event) => {
  }
 
 const handlePitchRating = (event) => {
-    console.log(`In handlePitchRating with event.target.id of ${event.target.id}`, event)
+    console.log(`In handlePitchRating with event.target.id of ${event.target.id}`)
     if (event.target.id === 'startId') {
         $('#startId').prop('disabled', true).css({'opacity': '0'});
         $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
@@ -279,7 +280,7 @@ const handlePitchRating = (event) => {
                 playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
                 $('#finish').prop('disabled',false);
             } else {
-                console.log('recursively calling self')
+                // console.log('recursively calling self')
                 // TODO is this the right thing to do?
                 handlePitchRating(event)
             }
@@ -401,31 +402,31 @@ const addPitchRatingInstructions = () => {
 const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
     const copy = [...ampInit]
-    for (let step = 0; step < 1; step++) {   // 0 & 4
+    for (let step = 0; step < 4; step++) {   // 0 & 4
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 1; step < 4; step++) {  // 4 & 9
+    for (let step = 4; step < 9; step++) {  // 4 & 9
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 4; step < 5; step++) { // 9 & 13
+    for (let step = 9; step < 13; step++) { // 9 & 13
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 1; step < 6; step++) { // 13 & 17
+    for (let step = 13; step < 17; step++) { // 13 & 17
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 6; step < 9; step++) { // 17 & 22
+    for (let step = 17; step < 22; step++) { // 17 & 22
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 9; step < 10; step++) {  // 22 & 26
+    for (let step = 22; step < 26; step++) {  // 22 & 26
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
-    for (let step = 10; step < 11; step++) {  // 26 & 30
+    for (let step = 26; step < 30; step++) {  // 26 & 30
         ampInit[step] = copy[testSettings.testLow.calPass];
     }
-    for (let step = 11; step < 14; step++) { // 30 & 35
+    for (let step = 30; step < 35; step++) { // 30 & 35
         ampInit[step] = copy[testSettings.testMid.calPass];
     }
-    for (let step = 14; step < 15; step++) { // 35 & 39
+    for (let step = 35; step < 39; step++) { // 35 & 39
         ampInit[step] = copy[testSettings.testHigh.calPass];
     }
     console.log('ending state of ampInit', ampInit)
@@ -570,7 +571,7 @@ const handleResidualInhibition = (event) => {
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
-    const duration = 2; // a 60-sec sound 
+    const duration = 2; // a 60-sec sound TODO - should this be deleted?
     $(event.target).addClass('played');
     playTestButtonsSound('Noisy', soundEar, amplitude, tone, 60, event.target.id);
     // let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
@@ -620,21 +621,6 @@ const switchToResidualInhibition = () => {
     prepButton('#testHigh', 8000);
     prepButton('#testMid', 4000);
     prepButton("#testLow", 1000);
-    // if (bracketFrequencies.indexOf(8000) != -1) {
-    //     $("#testHigh").attr('tone','8000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
-    // } else {
-    //     $("#testHigh").attr('tone','8000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
-    // }
-    // if (bracketFrequencies.indexOf(4000) != -1) {
-    //     $("#testMid").attr('tone','4000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
-    // } else {
-    //     $("#testMid").attr('tone','4000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
-    // }
-    // if (bracketFrequencies.indexOf(1000) != -1) {
-    //     $("#testLow").attr('tone','1000').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'}).removeClass('played');
-    // } else {
-    //     $("#testLow").attr('tone','1000').prop('disabled', true).css({'opacity': '0', 'cursor': 'not-allowed'}).addClass('notAudible');
-    // }
     // $('#finish').show().prop('disabled',true).css({'opacity': '1'}).html('Submit percentage');
 }
 
