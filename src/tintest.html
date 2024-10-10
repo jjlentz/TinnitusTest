@@ -193,19 +193,41 @@
                                 </label>
 
                             </div>
-                            <div id="ratingFormContainer" class="cell is-col-span-4" >
-                                <form id="tinnitusRating" style="display: none">
+                            <div id="ratingFormContainer1" class="cell is-col-span-4 RatingFormContainer" style="display: none" >
+<!--                                <form id="tinnitusRating" style="display: none">-->
                                     <label>Which sound best matches your tinnitus?
-                                        <input type="number" id="tinnitusMatchedSoundField" maxlength="2" size="36" max="3" min="1"
-                                               required placeholder=""/><br>
+                                        <select id="tinnitusMatchedSoundField">
+                                            <option value="">Select a sound</option>
+                                            <option value="1">Sound 1</option>
+                                            <option value="2">Sound 2</option>
+                                            <option value="3">Sound 3</option>
+                                        </select>
+<!--                                        <input type="number" id="tinnitusMatchedSoundField" maxlength="2" size="36" max="3" min="1"-->
+<!--                                               required placeholder=""/><br>-->
                                     </label>
-                                    <label>Rate the similarity your selected sound to your tinnitus
-                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="1"
-                                               required placeholder=""/><br>
+                            </div>
+                            <div id="ratingFormContainer2" class="cell is-col-span-4 RatingFormContainer" style="display: none">
+                            <label>Rate the similarity your selected sound to your tinnitus
+                                        <select id="tinnitusRatingField">
+                                            <option value="">Rate Similarity</option>
+                                            <option>10</option>
+                                            <option>9</option>
+                                            <option>8</option>
+                                            <option>7</option>
+                                            <option>6</option>
+                                            <option>5</option>
+                                            <option>4</option>
+                                            <option>3</option>
+                                            <option>2</option>
+                                            <option>1</option>
+                                        </select>
+<!--                                        <input type="number" id="tinnitusRatingField" maxlength="2" size="36" max="10" min="1"-->
+<!--                                               required placeholder=""/><br>-->
                                     </label>
-                                    <p>Use a number between 1 and 10, where 10 is identical to your tinnitus. </p>
-                                    <button id="submitTinRating" class="button is-primary">Submit Rating</button>
-                                </form>
+                                    <p>Select a number between 1 and 10, where 10 is identical to your tinnitus. </p>
+                            <div id="ratingFormContainer3" class="cell is-col-span-4 RatingFormContainer" style="display: none">
+                                <button id="submitTinRating" class="button is-primary">Submit Selections</button>
+<!--                                </form>-->
                             </div>
                         </div>
                     </div>
