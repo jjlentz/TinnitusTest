@@ -78,7 +78,6 @@ const topThreeIndices = (arr) => {
     return largestElements.map((el) => el.index)
 }
 
-// TODO disable options that don't have a matching button
 const switchToFinalMatch = () => {
     currentPhase = 'octaveTest';
     console.log(`switchToFinalMatch transitions to ${currentPhase} Phase`)
@@ -97,8 +96,6 @@ const switchToFinalMatch = () => {
     $('div.RatingFormContainer').show()
     $("#ratingSlider").hide();
     $("#finish").remove();
-    // {freq: frequencies[i], amplitude: amplitude}
-    // {value: bracketFrequenciesAndAmps[arrayIndex], index: arrayIndex}
     // sorting PitchMatchResult to establish most common value for the final pitch match, the middle one
     pitchMatchResult.sort((a, b) => b.value.freq - a.value.freq);
 
@@ -114,11 +111,13 @@ const switchToFinalMatch = () => {
     if ((bestMatchedTone.index === 0) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(lower) === false)) {
         lower = undefined;
         $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
+        $('#tinnitusMatchedSoundField option:last').attr('disabled', true);
     } 
     
     if ((pitchMatchResult[1].index === bracketFrequenciesAndAmps.length - 1) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(higher) === false)) {
         higher = undefined;
         $('#testHigh').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
+        $('#tinnitusMatchedSoundField option:nth-child(2)').attr('disabled', true);
     } 
 
     $('#testLow').attr('tone',lower);
@@ -195,15 +194,17 @@ const switchToQualityMatching = () => {
 //     console.log('pitchMatchingAmplitude AFTER', pitchMatchingAmplitude);
 // }
 
-// TODO: WHY ARE AMPLITUDES NaN
 // skip anything NOT heard as well as 5000, 7000, 10000
 const prepForPitchMatching = () => {
-    const tries = heardFrequencies.length / 3
+    const skipUs = [5000, 7000, 10000]
+    const tries = frequencies.length / 3
     for (let i = 0; i < tries; i++) {
-        const secondTry = heardFrequencies.length / 3 + i;
-        const thirdTry = (heardFrequencies.length / 3 * 3) + i;
-        if (heardFrequencies[i] || heardFrequencies[secondTry] || heardFrequencies[thirdTry]) {
+        const freq = frequencies[i];
+        const secondTry = tries + i;
+        const thirdTry = (tries * 2) + i;
+        if (!skipUs.includes(freq) && (heardFrequencies[i] || heardFrequencies[secondTry] || heardFrequencies[thirdTry])) {
             const amplitude = (ampInit[i] + ampInit[secondTry] + ampInit[thirdTry]) / 3;
+            console.log(`amplitude is ${amplitude} based on ampInit[${i}] + ampInit[${secondTry}] + ampInit[${thirdTry}]`)
             bracketFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude})
         }
     }
@@ -274,13 +275,14 @@ const handleQualityMatching = (event) => {
 // TODO Make sure done button is disabled while sound plays.
 const handlePitchRating = (event) => {
     console.log(`In handlePitchRating with event.target.id of ${event.target.id}`)
-    if (event.target.id === 'startId') {
-        $('#startId').prop('disabled', true).css({'opacity': '0'});
-        $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
-        const tone = ratingsFrequencies[frequencyIndex]
-        const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-        // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
-    } else if (event.target.id === 'finish') {
+    // if (event.target.id === 'startId') {
+    //     $('#startId').prop('disabled', true).css({'opacity': '0'});
+    //     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+    //     const tone = ratingsFrequencies[frequencyIndex]
+    //     const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+    //     // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
+    // } else
+    if (event.target.id === 'finish') {
         rating[frequencyIndex] = $('#rangeSlider').val();
         console.log(`Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`);
         if (frequencyIndex >= frequencies.length - 1) {
@@ -291,10 +293,7 @@ const handlePitchRating = (event) => {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
                 playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
-                $('#finish').prop('disabled',false);
             } else {
-                // console.log('recursively calling self')
-                // TODO is this the right thing to do?
                 handlePitchRating(event)
             }
         }
@@ -303,7 +302,6 @@ const handlePitchRating = (event) => {
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
         playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
-        $('#finish').prop('disabled',false);
     }
 }
 //
@@ -314,24 +312,8 @@ const handleFinalMatchAnswersSubmission = (event) => {
         console.log(`save rating ${rating} and the tone associated with sound button ${sound}`)
         switchToResidualInhibition();
     } else {
-        $('#tinnitusRating').append('<div class="notification is-danger">Both a sound selection and a rating are required</div>')
+        $('#ratingFormContainer2').append('<div class="notification is-danger">Both a sound selection and a rating are required</div>')
     }
-
-    // console.log(`handleFinalMatchAnswersSubmission`)
-    // const mostSimilarIndices = topThreeIndices(rating)
-    // const tones = []
-    // mostSimilarIndices.forEach((val) => {
-    //     tones.push({frequency: ratingsFrequencies[val], freqIndex: val})
-    // })
-    // console.log(`mostSimilarIndices are ${mostSimilarIndices}`);
-    // tones.sort((a, b) => b.frequency - a.frequency);
-    // let bestTone = tones[1];
-    // console.log(`equating to tones ${JSON.stringify(tones)} with best ${JSON.stringify(bestTone)}`);
-    // const tone = bestTone.frequency
-    // const amplitude = pitchRatingAmplitude[ratingCount[bestTone.freqIndex]]
-    //
-    // playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
-    // $('#submitTinRating').prop('disabled', false)
 }
 
 const addLevelMatchingInstructions = () => {
@@ -409,8 +391,6 @@ const addPitchRatingInstructions = () => {
 // 500, 2000, 3000, 4000, 8000,
 //     500, 2000, 3000, 4000, 8000,
 //     500, 2000, 3000, 4000, 8000
-
-//TODO Need to fix for final version
 
 const setLevelsFrequencyRanges = () => {
     console.log('starting state of ampInit', ampInit)
@@ -573,9 +553,8 @@ const handleFinishSoundSelection = (event) => {
     $(event.target).addClass('played');
     // $("#testButtons>button").prop('disabled', false);   //seems to be working ok this way. 
     if ($('#testButtons button.played').length === 3) {
-        $('#submitTinRating').prop('disabled',false)
-        // TODO change cursor to pointer when this button is enabled.
-    } 
+        $('#submitTinRating').prop('disabled',false).css({'opacity': '1', 'cursor': 'pointer'});
+    }
 }
 
 //TODO Buttons all need to be disabled until inibution thing is done
@@ -647,7 +626,7 @@ const switchToCalibration = () => {
 
 
 function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
-    $('button').prop('disabled', true);
+    $('button').prop('disabled', true).css({'cursor': 'not-allowed'});
     $("#ansButton1 button").css({'cursor': 'not-allowed'});
     $("#ansButton2 button").css({'cursor': 'not-allowed'});
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
@@ -671,7 +650,7 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
         if (buttonId) {
             $('#'+buttonId).prop('disabled', false);
         }
-        $("#finish").prop('disabled', false);
+        $("#finish").prop('disabled', false).css({'cursor': 'pointer'});
         $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer', 'opacity' : '1'});
         $("#ansButton2 button").prop('disabled', false).css({'cursor': 'pointer', 'opacity' : '1'});
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
@@ -682,8 +661,8 @@ const enableNextResidualInhibitionButton = () => {
     let endResidualInhibition = true;
     const buttons = $('#testButtons>button');
     for (let i = 0; i < buttons.length; i++) {
-        if (!buttons[i].hasClass('played')) {
-            buttons[i].prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
+        if (!$(buttons[i]).hasClass('played')) {
+            $(buttons[i]).prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
             endResidualInhibition = false;
             break;
         }
@@ -712,7 +691,7 @@ const doTinnitusReporting = (tone, count) => {
 }
 
 function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, buttonId) {
-    $('button').prop('disabled', true);
+    $('button').prop('disabled', true).css({'cursor': 'not-allowed'});
     $("#soundIndicator").css({'opacity': '1'}); // Turning on the circle while playing
 
     console.log(`duration and disabledButtonId ${duration} ${buttonId}`);
@@ -843,7 +822,7 @@ const handleParticipantForm = () => {
 }
 
 const submitExperimentResults = () => {
-    console.log(`submit tinitusRating of ${tinitusRating} and whatever additional data collected....`)
+    console.log(`submit whatever data collected....`)
     // TODO see tintest function of the same name
     for (let i = 0; i < frequencies.length; i++) {
         participantData['CalFreq'+i] = frequencies[i];
@@ -851,7 +830,7 @@ const submitExperimentResults = () => {
     for (let i = 0; i < ampInit.length; i++) {
         participantData['CalAmp'+i] = ampInit[i];
     }
-    participantData['clinicalRating'] = tinitusRating
+    // participantData['clinicalRating'] = tinitusRating
     for (let i = 0; i < ratingsFrequencies.length; i++) {
         participantData['rfreqs'+i] = ratingsFrequencies[i];
     }
@@ -935,7 +914,7 @@ $.when( $.ready ).then(() => {
     })
     $('#submitTinRating').click((event) => {
         event.preventDefault()
-        console.log(`submitTimeRating button clicked in phase ${currentPhase}`)
+        console.log(`submitTinRating button clicked in phase ${currentPhase}`)
         handleFinalMatchAnswersSubmission(event)
     })
 });
