@@ -1,6 +1,6 @@
 "use strict";
-const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.01;
-const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is 10 times bigger than initial amp for no HL - this is 20 dBs
+const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.001;
+const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is 100 times bigger than initial amp for no HL - this is 40 dB
 const TONE_DURATION = 2
 let participantData = {};
 let startTime = 0;
