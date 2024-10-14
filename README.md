@@ -55,5 +55,53 @@ aws cloudfront create-invalidation --distribution-id <distribution id> --paths "
 
 Look up the distribution id in the cloudfront portion of the AWS console.
 
+### Experiment Flow
+* Participant Data Collection - handleParticipantForm submits data to backend and shows `experiment` div
+* calibrateNoise Phase - user adjusts volume using computer volume control - phase specific button listener `$("button.testNoise")` and handler `handleNoiseCalibration()`
+* transition - `switchToQualityMatching()`
+* qualityMatching Phase -  handleQualityMatching() - plays two sounds from which user selects `tinnitusTypeMeasured`. 
+  Results used to decide which type of sounds are played to user.
+* transition - `switchToCalibration()`
+* calibrate Phase - `handleCalibration()`
+  * handleCalibrateAnswer() increases or decreases volume assigned to ampInit for a specific frequency, 
+  * handleCalibrateDone() transitions from High Freq to Mid Freq to Low Freq then transitions to next phase
+* transition - `beginLevelMatching()` includes 
+  * `setLevelsFrequencyRanges()` sets `ampInit` values based on High, Mid, and Low freq values collected in calibrate phase
+  * `addLevelMatchingInstructions()`
+  * `setUplevelMatching()`
+* levelSet Phase - handleLevelSet() adjusts `ampInit` up or down for freq in `frequencies` for `frequencyIndex`  
+  * `handleLevelSetDone()` switches to next frequency until last `frequency` in array reached then 
+* transition - `switchToPitchMatching()` - no longer calls prepPitchMatchingAmplitudes ?????? WHAT AMPLITUDES ARE USED???
+                                            NEED TO REINSTATE prepPitchMatchingAmplitudes
+* pitchMatching Phase - `handlePitchMatching()` - 3 attempts to zero in on the pitch matching the tinnitus, pushing results onto `pitchMatchResult`
+  PITCH MATCHING IS USING FREQ I cannot hear which it should not be using
+  then
+* transition - `switchToPitchRating()` - Fills `pitchRatingAmplitude` (1/3 length of `frequencies`) getting the avg of pitchRatingAmplitude values for each freq
+  * SAME AS prepPitchMatchingAmplitudes ??????? NEED TO DROP THIS as it will now be duplicate work
+* pitchRating Phase - `handlePitchRating()`  should be recording results, instead logging `Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`
+  * upon reaching the end of frequencies, then
+* transition - `switchToFinalMatch()` - determines up to 3 tones to test 
+* octaveTest Phase - `handleFinishSoundSelection()` plays up to 3 sounds (determined from results of pitchMatching Phase)
+* `submitTinRating` listener calls `handleFinalMatchAnswersSubmission()` should be recording results, instead logging `save rating ${rating} and the tone associated with sound button ${sound}` WHAT DO WE DO WITH THIS???
+  SHOULD MOVE TO RIGHT AFTER PITCH MATCHING
+  * then 
+* transition - `switchToResidualInhibition()` uses 8000, 4000, 1000 tones. Checks to see if bracketFrequencies is one of these frequencies
+* residualInhibition Phase - `handleResidualInhibition()` 
+  * triggers `doTinnitusReporting()`
+    * `pushing ${tinnitusPercentage} onto tinnitusReports with count of ${count}` WHAT DO WE DO WITH THIS???
+* MISSING - PROPER BUTTON endabling / disabling in residualInhibition Phase and final transition `complete()`
+
+## Reporting At the END of the ??? 
+* tinnitusTypeMeasured - string SAVE self report and result of qualityMatching Phase????
+* pitchMatchResult - array of 3 frequencies - result of pitchMatching Phase
+* `Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}` array of {freq: number, rating: number}
+* `save rating ${rating} and the tone associated with sound button ${sound}` {freq: number, rating: number}
+* `pushing ${tinnitusPercentage} onto tinnitusReports with count of ${count}` {freq: number, tinnitusPercentage: [number]}
+* also need to save amplitudes from level set {freq: number, ampChange: number}[]
+
+
 ## Citation
 This code may be modified for a user's specific needs, but this repository should be acknowledged in the comments of any source code and in any print or online publication.
+
+
+RANDOMIZE before level set and then randomize before pitch rating
