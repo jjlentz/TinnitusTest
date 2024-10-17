@@ -45,6 +45,7 @@ for (let step = 0; step < ratingsFrequencies.length; step++) {
     ratingCount.push(step % (ratingsFrequencies.length / 3)); //put back after testing!
     rating.push(-1);
 }
+const pitchRatingFrequenciesAndAmps = []
 
 // will be initialized later
 let step = null;
@@ -65,6 +66,13 @@ function shuffle(freqArray, counterArray) {
         // swap elements array[i] and array[j]
         [freqArray[i], freqArray[j]] = [freqArray[j], freqArray[i]];
         [counterArray[i], counterArray[j]] = [counterArray[j], counterArray[i]];
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 
@@ -283,30 +291,26 @@ const handlePitchRating = (event) => {
     //     // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     // } else
     if (event.target.id === 'finish') {
-        rating[frequencyIndex] = $('#rangeSlider').val();
-        console.log(`Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`);
-        if (frequencyIndex >= frequencies.length - 1) {
+        pitchRatingFrequenciesAndAmps[frequencyIndex]['rating'] = $('#rangeSlider').val();
+        console.log(`Recording rating of ${JSON.stringify(pitchRatingFrequenciesAndAmps[frequencyIndex])} for index ${frequencyIndex}`);
+        if (frequencyIndex >= pitchRatingFrequenciesAndAmps.length - 1) {
             switchToFinalMatch();
         } else {
             frequencyIndex++;
-            if (heardFrequencies[frequencyIndex]) {
-                const tone = ratingsFrequencies[frequencyIndex]
-                const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-                $('#rangeSlider').val(1);
-                playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
-            } else {
-                handlePitchRating(event)
-            }
+            const tone = pitchRatingFrequenciesAndAmps[frequencyIndex].freq;
+            const amplitude = pitchRatingFrequenciesAndAmps[frequencyIndex].amplitude;
+            $('#rangeSlider').val(1);
+            playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
         }
     } else {
         // just play the same thing again
-        const tone = ratingsFrequencies[frequencyIndex]
-        const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+        const tone = pitchRatingFrequenciesAndAmps[frequencyIndex].freq;
+        const amplitude = pitchRatingFrequenciesAndAmps[frequencyIndex].amplitude;
         $('#rangeSlider').val(1);
         playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     }
 }
-//
+
 const handleFinalMatchAnswersSubmission = (event) => {
     const sound = $('#tinnitusMatchedSoundField').val();
     const rating = $('#tinnitusRatingField').val();
@@ -503,7 +507,19 @@ const switchToPitchRating = () => {
     $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
-    frequencyIndex = 0;
+    frequencyIndex = 0
+    const size = frequencies.length / 3;
+    for (let i = 0; i < size; i++) {
+        const secondTry = size + i;
+        const thirdTry = (size * 2) + i;
+        if (heardFrequencies[i] || heardFrequencies[secondTry] || heardFrequencies[thirdTry]) {
+            const amplitude = (ampInit[i] + ampInit[secondTry] + ampInit[thirdTry]) / 3;
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+        }
+    }
+    shuffleArray(pitchRatingFrequenciesAndAmps);
     for (step = 0; step < pitchRatingAmplitude.length; step++) {
         pitchRatingAmplitude[step] =
             (ampInit[step]
