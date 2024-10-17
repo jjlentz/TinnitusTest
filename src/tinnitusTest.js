@@ -292,6 +292,7 @@ const handlePitchRating = (event) => {
             if (heardFrequencies[frequencyIndex]) {
                 const tone = ratingsFrequencies[frequencyIndex]
                 const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+                $('#rangeSlider').val(1);
                 playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
             } else {
                 handlePitchRating(event)
@@ -301,6 +302,7 @@ const handlePitchRating = (event) => {
         // just play the same thing again
         const tone = ratingsFrequencies[frequencyIndex]
         const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+        $('#rangeSlider').val(1);
         playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     }
 }
@@ -428,8 +430,8 @@ const setLevelsFrequencyRanges = () => {
 const setUplevelMatching = () => {
     // remove the calibration test buttons
     $('#testButtons>button').css({'opacity': '0'})
-    $("#down").html('tinnitus is softer').prop('disabled', true);
-    $("#up").html('tinnitus is louder').prop('disabled', true);
+    $("#down").html('tinnitus is softer').prop('disabled', true).css({'opacity': '.5', 'cursor': 'not-allowed'});;
+    $("#up").html('tinnitus is louder').prop('disabled', true).css({'opacity': '.5', 'cursor': 'not-allowed'});;
     $("#finish").html("Done").prop('disabled', true);
     $('#startId').prop('disabled', false).css({'opacity': '1', 'cursor' : 'pointer'});
     //Setting up new frequency range
