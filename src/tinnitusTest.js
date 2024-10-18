@@ -116,13 +116,13 @@ const switchToFinalMatch = () => {
         lower = 500;
     }
     console.log(`best matched tone ${bestMatchedTone} at index: ${pitchMatchResult[1].index}, lower tone ${lower}, higher tone: ${higher}`)
-    if ((bestMatchedTone.index === 0) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(lower) === false)) {
-        lower = undefined;
-        $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
-        $('#tinnitusMatchedSoundField option:last').attr('disabled', true);
-    } 
-    
-    if ((pitchMatchResult[1].index === bracketFrequenciesAndAmps.length - 1) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(higher) === false)) {
+    // if ((bestMatchedTone.index === 0) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(lower) === false)) {
+    //     lower = undefined;
+    //     $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
+    //     $('#tinnitusMatchedSoundField option:last').attr('disabled', true);
+    // }
+   // frequencies.length / 3
+    if (bestMatchedTone === frequencies[(frequencies.length/3) - 1]) {
         higher = undefined;
         $('#testHigh').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
         $('#tinnitusMatchedSoundField option:nth-child(2)').attr('disabled', true);
@@ -318,7 +318,7 @@ const handleFinalMatchAnswersSubmission = (event) => {
         console.log(`save rating ${rating} and the tone associated with sound button ${sound}`)
         switchToResidualInhibition();
     } else {
-        $('#ratingFormContainer2').append('<div class="notification is-danger">Both a sound selection and a rating are required</div>')
+        $('#ratingFormContainer2').append('<div class="notification is-danger"><p>Both a sound selection and a rating are required</p></div>')
     }
 }
 
@@ -520,11 +520,11 @@ const switchToPitchRating = () => {
         }
     }
     shuffleArray(pitchRatingFrequenciesAndAmps);
-    for (step = 0; step < pitchRatingAmplitude.length; step++) {
-        pitchRatingAmplitude[step] =
-            (ampInit[step]
-                + ampInit[step + pitchRatingAmplitude.length]
-                + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
+    for (let i = 0; i < pitchRatingAmplitude.length; i++) {
+        pitchRatingAmplitude[i] =
+            (ampInit[i]
+                + ampInit[i + pitchRatingAmplitude.length]
+                + ampInit[i + (2 * pitchRatingAmplitude.length)]) / 3;
     }
 }
 
@@ -564,7 +564,8 @@ const handleCalibrateDone = () => {
 const handleFinishSoundSelection = (event) => {
     //This is the octave test - set in switchtoFinalPitchMatch
     const tone = $(event.target).attr('tone');
-    const toneIndex = frequencies.indexOf(Number(tone));
+    // if the tone is 250, we don't have that one, so we'll use 500 or the first
+    const toneIndex = tone === '250' ? 0 : frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
     console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
     playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, TONE_DURATION, null)
@@ -585,6 +586,8 @@ const handleResidualInhibition = (event) => {
     const amplitude = pitchRatingAmplitude[toneIndex];
     $(event.target).addClass('played');
     playTestButtonsSound('Noisy', soundEar, amplitude, tone, 60, event.target.id);
+    $('#hriHelper').remove()
+    $('#testNoiseButton').append('<div id="hriHelper" class="notification is-info"><p>Please Wait</p></div>')
 }
 
 const handleCalibration = (event) => {
@@ -687,6 +690,9 @@ const enableNextResidualInhibitionButton = () => {
     }
     if (endResidualInhibition) {
         complete();
+    } else {
+        $('#hriHelper').remove()
+        $('#testNoiseButton').append('<div id="hriHelper" class="notification is-info"><p>Click next Sound button</p></div>')
     }
 
 }
@@ -875,6 +881,7 @@ const complete = () => {
     $("#instruct").html('Thank you.  You are done!');
     $("#startingInstr").remove();
     $('#tinnitusRating').remove();
+    // todo make the residual sound buttons go away?
     submitExperimentResults();
 }
 
