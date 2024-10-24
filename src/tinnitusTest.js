@@ -116,24 +116,22 @@ const switchToFinalMatch = () => {
         lower = 500;
     }
     console.log(`best matched tone ${bestMatchedTone} at index: ${pitchMatchResult[1].index}, lower tone ${lower}, higher tone: ${higher}`)
-    // if ((bestMatchedTone.index === 0) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(lower) === false)) {
-    //     lower = undefined;
-    //     $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
-    //     $('#tinnitusMatchedSoundField option:last').attr('disabled', true);
-    // }
-   // frequencies.length / 3
     if (bestMatchedTone === frequencies[(frequencies.length/3) - 1]) {
         higher = undefined;
         $('#testHigh').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
+        // nth-child starts at 1 and we want the 'Sound 1' or 2nd option disabled
         $('#tinnitusMatchedSoundField option:nth-child(2)').attr('disabled', true);
     }
     participantData['octaveTestFrequences'] = [lower, bestMatchedTone, higher];
-    // TODO: set the option values for each tone
-    // $('#tinnitusMatchedSoundField>option')[1];
-    
-    $('#testLow').attr('tone',lower);
-    $('#testMid').attr('tone',bestMatchedTone);
+
+    if (higher) {
+        $('#tinnitusMatchedSoundField option:contains("Sound 1")').attr('value', higher.toString());
+    }
+    $('#tinnitusMatchedSoundField option:contains("Sound 2")').attr('value', bestMatchedTone.toString());
+    $('#tinnitusMatchedSoundField option:contains("Sound 3")').attr('value', lower.toString());
     $('#testHigh').attr('tone',higher);
+    $('#testMid').attr('tone',bestMatchedTone);
+    $('#testLow').attr('tone',lower);
 }
 
 const handleLevelSetDone = (event) => {
@@ -639,7 +637,7 @@ const prepButton = (idSelector, tone) => {
 
 const switchToResidualInhibition = () => {
     currentPhase = 'residualInhibition';
-    $('div.RatingFormContainer').remove();
+    $('div.RatingFormContainer').hide();
     addRIInstructions();
     $("#testButtons>button").removeAttr('tone').removeClass('notAudible');
     prepButton('#testHigh', 8000);
@@ -707,7 +705,8 @@ const enableNextResidualInhibitionButton = () => {
     if (endResidualInhibition) {
         complete(true);
     } else {
-        $('#hriHelper').remove()
+        $('#hriHelper').remove();
+        $('#emergencyStop').remove();
         $('#testNoiseButton').append('<div id="hriHelper" class="notification is-info"><p>Click next Sound button</p></div>')
     }
 
