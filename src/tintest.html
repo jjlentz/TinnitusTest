@@ -58,6 +58,10 @@
             color: #721c24;
             background-color: #f8d7da;
         }
+        button:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
 
     </style>
 </head>
@@ -192,7 +196,7 @@
 
                             <div class="slidecontainer cell is-col-span-4" style="display: none" id="ratingSlider">
                                 <label>
-                                    <input type="range" min="1" max="100" value="50" class="slider" id="rangeSlider">
+                                    <input type="range" min="1" max="100" value="1" class="slider" id="rangeSlider">
                                     <span id='0' style="float:left; width:20%; text-align: left">Not at all similar </span>
                                     <span id='25' style="float:left; width:20%; text-align: left"> Not very similar </span>
                                     <span id='50' style="float:left; width:20%; text-align: center">Somewhat similar </span>
@@ -202,7 +206,6 @@
 
                             </div>
                             <div id="ratingFormContainer1" class="cell is-col-span-4 RatingFormContainer" style="display: none" >
-<!--                                <form id="tinnitusRating" style="display: none">-->
                                     <label>Which sound best matches your tinnitus?
                                         <select id="tinnitusMatchedSoundField">
                                             <option value="">Select a sound</option>
@@ -210,8 +213,6 @@
                                             <option value="2">Sound 2</option>
                                             <option value="3">Sound 3</option>
                                         </select>
-<!--                                        <input type="number" id="tinnitusMatchedSoundField" maxlength="2" size="36" max="3" min="1"-->
-<!--                                               required placeholder=""/><br>-->
                                     </label>
                             </div>
                             <div id="ratingFormContainer2" class="cell is-col-span-4 RatingFormContainer" style="display: none">

@@ -45,6 +45,7 @@ for (let step = 0; step < ratingsFrequencies.length; step++) {
     ratingCount.push(step % (ratingsFrequencies.length / 3)); //put back after testing!
     rating.push(-1);
 }
+const pitchRatingFrequenciesAndAmps = []
 
 // will be initialized later
 let step = null;
@@ -65,6 +66,13 @@ function shuffle(freqArray, counterArray) {
         // swap elements array[i] and array[j]
         [freqArray[i], freqArray[j]] = [freqArray[j], freqArray[i]];
         [counterArray[i], counterArray[j]] = [counterArray[j], counterArray[i]];
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 
@@ -108,21 +116,22 @@ const switchToFinalMatch = () => {
         lower = 500;
     }
     console.log(`best matched tone ${bestMatchedTone} at index: ${pitchMatchResult[1].index}, lower tone ${lower}, higher tone: ${higher}`)
-    if ((bestMatchedTone.index === 0) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(lower) === false)) {
-        lower = undefined;
-        $('#testLow').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
-        $('#tinnitusMatchedSoundField option:last').attr('disabled', true);
-    } 
-    
-    if ((pitchMatchResult[1].index === bracketFrequenciesAndAmps.length - 1) || (bracketFrequenciesAndAmps.map(el => el.freq).includes(higher) === false)) {
+    if (bestMatchedTone === frequencies[(frequencies.length/3) - 1]) {
         higher = undefined;
         $('#testHigh').css({'opacity' : '0', 'cursor': 'not-allowed'}).addClass('played notAudible').prop('disabled', true);  //If sound doesn't exist or isn't audible, hide and get played class
+        // nth-child starts at 1 and we want the 'Sound 1' or 2nd option disabled
         $('#tinnitusMatchedSoundField option:nth-child(2)').attr('disabled', true);
-    } 
+    }
+    participantData['octaveTestFrequences'] = [lower, bestMatchedTone, higher];
 
-    $('#testLow').attr('tone',lower);
-    $('#testMid').attr('tone',bestMatchedTone);
+    if (higher) {
+        $('#tinnitusMatchedSoundField option:contains("Sound 1")').attr('value', higher.toString());
+    }
+    $('#tinnitusMatchedSoundField option:contains("Sound 2")').attr('value', bestMatchedTone.toString());
+    $('#tinnitusMatchedSoundField option:contains("Sound 3")').attr('value', lower.toString());
     $('#testHigh').attr('tone',higher);
+    $('#testMid').attr('tone',bestMatchedTone);
+    $('#testLow').attr('tone',lower);
 }
 
 const handleLevelSetDone = (event) => {
@@ -283,36 +292,35 @@ const handlePitchRating = (event) => {
     //     // playOneSound(participantData['tinnitusType'], soundEar, amplitude, tone, null)
     // } else
     if (event.target.id === 'finish') {
-        rating[frequencyIndex] = $('#rangeSlider').val();
-        console.log(`Recording rating of ${rating[frequencyIndex]} for index ${frequencyIndex}`);
-        if (frequencyIndex >= frequencies.length - 1) {
+        pitchRatingFrequenciesAndAmps[frequencyIndex]['rating'] = $('#rangeSlider').val();
+        console.log(`Recording rating of ${JSON.stringify(pitchRatingFrequenciesAndAmps[frequencyIndex])} for index ${frequencyIndex}`);
+        if (frequencyIndex >= pitchRatingFrequenciesAndAmps.length - 1) {
             switchToFinalMatch();
         } else {
             frequencyIndex++;
-            if (heardFrequencies[frequencyIndex]) {
-                const tone = ratingsFrequencies[frequencyIndex]
-                const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
-                playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
-            } else {
-                handlePitchRating(event)
-            }
+            const tone = pitchRatingFrequenciesAndAmps[frequencyIndex].freq;
+            const amplitude = pitchRatingFrequenciesAndAmps[frequencyIndex].amplitude;
+            $('#rangeSlider').val(1);
+            playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
         }
     } else {
         // just play the same thing again
-        const tone = ratingsFrequencies[frequencyIndex]
-        const amplitude = pitchRatingAmplitude[ratingCount[frequencyIndex]]
+        const tone = pitchRatingFrequenciesAndAmps[frequencyIndex].freq;
+        const amplitude = pitchRatingFrequenciesAndAmps[frequencyIndex].amplitude;
+        $('#rangeSlider').val(1);
         playOneSound(tinnitusTypeMeasured, soundEar, amplitude, tone, null)
     }
 }
-//
+
 const handleFinalMatchAnswersSubmission = (event) => {
     const sound = $('#tinnitusMatchedSoundField').val();
     const rating = $('#tinnitusRatingField').val();
     if (sound && rating) {
         console.log(`save rating ${rating} and the tone associated with sound button ${sound}`)
+        participantData['octaveTestResults'] = {frequency: sound, rating: rating}
         switchToResidualInhibition();
     } else {
-        $('#ratingFormContainer2').append('<div class="notification is-danger">Both a sound selection and a rating are required</div>')
+        $('#ratingFormContainer2').append('<div class="notification is-danger"><p>Both a sound selection and a rating are required</p></div>')
     }
 }
 
@@ -428,8 +436,8 @@ const setLevelsFrequencyRanges = () => {
 const setUplevelMatching = () => {
     // remove the calibration test buttons
     $('#testButtons>button').css({'opacity': '0'})
-    $("#down").html('tinnitus is softer').prop('disabled', true);
-    $("#up").html('tinnitus is louder').prop('disabled', true);
+    $("#down").html('tinnitus is softer').prop('disabled', true).css({'opacity': '.5', 'cursor': 'not-allowed'});;
+    $("#up").html('tinnitus is louder').prop('disabled', true).css({'opacity': '.5', 'cursor': 'not-allowed'});;
     $("#finish").html("Done").prop('disabled', true);
     $('#startId').prop('disabled', false).css({'opacity': '1', 'cursor' : 'pointer'});
     //Setting up new frequency range
@@ -501,12 +509,24 @@ const switchToPitchRating = () => {
     $('#up').html('Play').prop('disabled', false).css({'opacity': '1','cursor': 'pointer'});
     $('#ratingSlider').show();
     $("#finish").css({'opacity': '1','cursor': 'pointer','background-color': 'green'});
-    frequencyIndex = 0;
-    for (step = 0; step < pitchRatingAmplitude.length; step++) {
-        pitchRatingAmplitude[step] =
-            (ampInit[step]
-                + ampInit[step + pitchRatingAmplitude.length]
-                + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
+    frequencyIndex = 0
+    const size = frequencies.length / 3;
+    for (let i = 0; i < size; i++) {
+        const secondTry = size + i;
+        const thirdTry = (size * 2) + i;
+        if (heardFrequencies[i] || heardFrequencies[secondTry] || heardFrequencies[thirdTry]) {
+            const amplitude = (ampInit[i] + ampInit[secondTry] + ampInit[thirdTry]) / 3;
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+            pitchRatingFrequenciesAndAmps.push({freq: frequencies[i], amplitude: amplitude});
+        }
+    }
+    shuffleArray(pitchRatingFrequenciesAndAmps);
+    for (let i = 0; i < pitchRatingAmplitude.length; i++) {
+        pitchRatingAmplitude[i] =
+            (ampInit[i]
+                + ampInit[i + pitchRatingAmplitude.length]
+                + ampInit[i + (2 * pitchRatingAmplitude.length)]) / 3;
     }
 }
 
@@ -546,9 +566,10 @@ const handleCalibrateDone = () => {
 const handleFinishSoundSelection = (event) => {
     //This is the octave test - set in switchtoFinalPitchMatch
     const tone = $(event.target).attr('tone');
-    const toneIndex = frequencies.indexOf(Number(tone));
+    // if the tone is 250 or 750 we don't have that one, so we'll use 500 or the first
+    const toneIndex = ['250', '750'].includes(tone) ? 0 : frequencies.indexOf(Number(tone));
     const amplitude = pitchRatingAmplitude[toneIndex];
-    console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
+    // console.log(`hello from handleFinishSoundSelection attribute index and amplitude ${tone} ${toneIndex} ${amplitude}`, event);
     playTestButtonsSound(tinnitusTypeMeasured, soundEar, amplitude, tone, TONE_DURATION, null)
     $(event.target).addClass('played');
     // $("#testButtons>button").prop('disabled', false);   //seems to be working ok this way. 
@@ -564,9 +585,23 @@ const handleResidualInhibition = (event) => {
     console.log(`The clicked button has id ${event.target.id}`, event)
     const tone = $(event.target).attr('tone');
     const toneIndex = frequencies.indexOf(Number(tone));
-    const amplitude = pitchRatingAmplitude[toneIndex];
+    // make the amplitude 50 decibels above the amplitude matching the "tinnitus loudness"
+    let amplitude = pitchRatingAmplitude[toneIndex] * 316;
+    if (amplitude > 1) {
+        amplitude = 1;
+    }
     $(event.target).addClass('played');
     playTestButtonsSound('Noisy', soundEar, amplitude, tone, 60, event.target.id);
+    $('#hriHelper').remove();
+    $('#testNoiseButton').append('<div id="hriHelper" class="notification is-info"><p>Please Wait</p></div>');
+    $('#testNoiseButton').append('<button id="emergencyStop" onClick="stop(event)" class="button">Stop (too loud)</button>');
+}
+
+const stop = (event) => {
+    event.preventDefault();
+    Howler.stop();
+    console.log("STop button pressed");
+    complete(false);
 }
 
 const handleCalibration = (event) => {
@@ -602,7 +637,7 @@ const prepButton = (idSelector, tone) => {
 
 const switchToResidualInhibition = () => {
     currentPhase = 'residualInhibition';
-    $('div.RatingFormContainer').remove();
+    $('div.RatingFormContainer').hide();
     addRIInstructions();
     $("#testButtons>button").removeAttr('tone').removeClass('notAudible');
     prepButton('#testHigh', 8000);
@@ -668,17 +703,22 @@ const enableNextResidualInhibitionButton = () => {
         }
     }
     if (endResidualInhibition) {
-        complete();
+        complete(true);
+    } else {
+        $('#hriHelper').remove();
+        $('#emergencyStop').remove();
+        $('#testNoiseButton').append('<div id="hriHelper" class="notification is-info"><p>Click next Sound button</p></div>')
     }
 
 }
 const doTinnitusReporting = (tone, count) => {
     let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
+    const timestamp = Date.now()
     const report = tinnutusReports.find(el => el.tone === tone)
     if (report) {
-        report.percentages.push(tinnitusPercentage)
+        report.percentages.push({tinnitusPercentage, timestamp})
     } else {
-        tinnutusReports.push({tone: tone, percentages: [tinnitusPercentage]});
+        tinnutusReports.push({tone: tone, percentages: [{tinnitusPercentage, timestamp}]});
     }
     console.log(`pushing ${tinnitusPercentage} onto tinnitusReports with count of ${count}`)
     if (!(tinnitusPercentage === '100' || count === 8)) {
@@ -821,22 +861,29 @@ const handleParticipantForm = () => {
     });
 }
 
-const submitExperimentResults = () => {
-    console.log(`submit whatever data collected....`)
+const submitExperimentResults = (completedResidualInhibition) => {
+    console.log(`submit whatever data collected....${completedResidualInhibition}`)
     // TODO see tintest function of the same name
-    for (let i = 0; i < frequencies.length; i++) {
-        participantData['CalFreq'+i] = frequencies[i];
-    }
-    for (let i = 0; i < ampInit.length; i++) {
-        participantData['CalAmp'+i] = ampInit[i];
-    }
+    // for (let i = 0; i < frequencies.length; i++) {
+    //     participantData['CalFreq'+i] = frequencies[i];
+    // }
+    // for (let i = 0; i < ampInit.length; i++) {
+    //     participantData['CalAmp'+i] = ampInit[i];
+    // }
+    participantData['frequencies'] = frequencies;
+    participantData['amplitudes'] = ampInit;
+    participantData['tinnitusTypeMeasured'] = tinnitusTypeMeasured;
+    participantData['pitchMatchResult'] = pitchMatchResult;
+    participantData['pitchRatingFrequenciesAndAmps'] = pitchRatingFrequenciesAndAmps;
+    participantData['tinnutusReports'] = tinnutusReports;
+    participantData['completedResidualInhibition'] = completedResidualInhibition;
     // participantData['clinicalRating'] = tinitusRating
-    for (let i = 0; i < ratingsFrequencies.length; i++) {
-        participantData['rfreqs'+i] = ratingsFrequencies[i];
-    }
-    for (let i = 0; i < rating.length; i++) {
-        participantData['rating'+i] = rating[i];
-    }
+    // for (let i = 0; i < ratingsFrequencies.length; i++) {
+    //     participantData['rfreqs'+i] = ratingsFrequencies[i];
+    // }
+    // for (let i = 0; i < rating.length; i++) {
+    //     participantData['rating'+i] = rating[i];
+    // }
     console.log('POSTING DATA', participantData)
     // TODO POST
     // $.ajax({
@@ -852,12 +899,16 @@ const submitExperimentResults = () => {
     //     $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");
     // });
 }
-const complete = () => {
+const complete = (completedResidualInhibition) => {
     $("#up").remove();
     $("#instruct").html('Thank you.  You are done!');
     $("#startingInstr").remove();
     $('#tinnitusRating').remove();
-    submitExperimentResults();
+    // todo make the residual sound buttons go away?
+    $('#testButtons').remove();
+    $('#hriHelper').remove();
+    $('#emergencyStop').remove();
+    submitExperimentResults(completedResidualInhibition);
 }
 
 
