@@ -7,7 +7,7 @@
   "author": "Jennifer Lentz",
   "license": "MIT",
   "dependencies": {
-    "fast-csv": "5.0.0"
+    "fast-csv": "5.0.2"
   },
   "scripts": {
   }

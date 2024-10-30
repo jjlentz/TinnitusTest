@@ -1,6 +1,6 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 const findParticipantIndex = async (participantId, s3, bucket) => {
-
+    console.log(`looking for ${participantId} in ${bucket}`)
     const getParams = new GetObjectCommand({
         Bucket: bucket,
         Key: 'participants.txt'
