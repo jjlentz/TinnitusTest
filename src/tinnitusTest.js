@@ -3,7 +3,6 @@ const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.001;
 const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is 100 times bigger than initial amp for no HL - this is 40 dB
 const TONE_DURATION = 2
 let participantData = {};
-let startTime = 0;
 let soundEar = "R";
 let tinnitusTypeMeasured = "Tonal";
 let currentPhase = 'calibrateNoise';
@@ -828,6 +827,7 @@ const handleParticipantForm = () => {
         participantData['tinnitusType'] = $('#tinnitusType').val();
         participantData['hearingLoss'] = $('#hearingLoss').val();
         participantData['earphoneDescription'] = $('#earphoneDescription').val();
+        participantData['browser'] = navigator.userAgent;
         console.log("participantData", participantData);
         if (participantData['tinnitusEar'] === "Right"){
             soundEar = "L";
@@ -836,17 +836,17 @@ const handleParticipantForm = () => {
         } else {
             soundEar = "R";  //Sound played in Right ear if tinnitus is bilateral
         }
-        // TODO POST THE DATA
-        console.log(`SUBMITTING ${JSON.stringify({participantId: pid, browser: navigator.userAgent})}`)
-        // $.ajax({
-        //     type: 'POST',
-        //     url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
-        //     dataType: 'json',
-        //     data: {participantId: pid, browser: navigator.userAgent}
-        // })
-        //     .done((response) => {
-        //         startTime = response.startTime;
-                startTime = new Date();
+        // POST THE DATA
+        console.log(`SUBMITTING ${JSON.stringify(participantData)}`);
+        $.ajax({
+             type: 'POST',
+             url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
+             dataType: 'json',
+             data: JSON.stringify(participantData)
+        })
+            .done((response) => {
+                const startTime = response.startTime;
+                participantData['startTime'] = startTime;
                 $('#participation').hide();
                 $('#experiment').show();
                 $('footer.footer').show();
@@ -854,10 +854,10 @@ const handleParticipantForm = () => {
                 const value = participantData['hearingLoss'] === 'HL' ?
                     INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
                 ampInit = Array(frequencies.length).fill(value);
-            // })
-            // .fail(() => {
-            //     $('#participantForm').append('<div class="notification is-danger">The Participant Id is not valid</div>');
-            // });
+            })
+            .fail(() => {
+                $('#participantForm').append('<div class="notification is-danger">The Participant Id is not valid</div>');
+            });
     });
 }
 
@@ -877,6 +877,7 @@ const submitExperimentResults = (completedResidualInhibition) => {
     participantData['pitchRatingFrequenciesAndAmps'] = pitchRatingFrequenciesAndAmps;
     participantData['tinnutusReports'] = tinnutusReports;
     participantData['completedResidualInhibition'] = completedResidualInhibition;
+    participantData['endTime'] = new Date();
     // participantData['clinicalRating'] = tinitusRating
     // for (let i = 0; i < ratingsFrequencies.length; i++) {
     //     participantData['rfreqs'+i] = ratingsFrequencies[i];
@@ -885,19 +886,18 @@ const submitExperimentResults = (completedResidualInhibition) => {
     //     participantData['rating'+i] = rating[i];
     // }
     console.log('POSTING DATA', participantData)
-    // TODO POST
-    // $.ajax({
-    //     type: 'POST',
-    //     url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/complete/',
-    //     dataType: 'json',
-    //     data: participantData
-    // }).done(() => {
-    //     console.log('DATA SAVED');
-    //     console.log(myData)
-    // }).fail((err) => {
-    //     console.error('Data not saved', err);
-    //     $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");
-    // });
+    // POST
+    $.ajax({
+        type : 'POST',
+         url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/complete/',
+         dataType: 'json',
+         data: JSON.stringify(participantData)
+     }).done(() => {
+         console.log('DATA SAVED', participantData);
+    }).fail((err) => {
+        console.error('Data not saved', err);
+        $("#startingInstr").html("<li id='Instructions'>OOPS - something went completely wrong saving your experiment data.</li>");
+    });
 }
 const complete = (completedResidualInhibition) => {
     $("#up").remove();

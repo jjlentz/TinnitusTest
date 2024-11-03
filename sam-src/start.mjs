@@ -45,30 +45,37 @@ const appendCsv = async (newRow, s3, bucket) => {
 const saveStartTime = async (newRow, s3, bucket) => {
     const now = new Date();
     const dateString = now.toISOString();
-    let text = 'START TIME\t' + dateString
-        + '\nBROWSER\t' + newRow.browser;
-    const params = new PutObjectCommand({
-        Body: text,
+    newRow['startTime'] = dateString;
+    const command = new PutObjectCommand({
+        Body: JSON.stringify(newRow, null, 4),
         Bucket: bucket,
-        Key: newRow.participantId + '.txt'
+        Key: newRow.participantId + '.txt',
+        ContentType: 'application/json'
     });
-    const response = await s3.send(params);
-    console.log(response)
-    newRow['start'] = dateString;
-    await appendCsv(newRow, s3, bucket);
-    return dateString;
+    try {
+        const response = await s3.send(command);
+        console.log("file upload response:",response)
+        //newRow['start'] = dateString;
+        //await appendCsv(newRow, s3, bucket);
+        return dateString;
+    } catch (err) {
+        console.error('Error writing participant data to s3', err)
+    }
 };
 
 export const handler = async (event) => {
     const bucket = process.env.EXPERIMENT_BUCKET;
-
-    const rawBody = event.body;
-    const data = querystring.parse(rawBody);
-    const id = data.participantId;
+    console.log(`EVENT: \n ${JSON.stringify(event, null, 4)}`);
+    const bodyString = event.body;
+    const submission = JSON.parse(bodyString)
+    // const rawBody = event.body;
+    // const data = querystring.parse(rawBody);
+    // const id = data.participantId;
+    console.log("SUBMISSION", submission)
     const client = new S3Client({});
-    const index = await findParticipantIndex(id, client, bucket);
+    const index = await findParticipantIndex(submission.participantId, client, bucket);
     if (index > -1) {
-        const startTime = await saveStartTime(data, client, bucket);
+        const startTime = await saveStartTime(submission, client, bucket);
         return {
             'statusCode': 200,
             headers: {
