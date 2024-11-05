@@ -32,8 +32,8 @@ const frequencies = [
     500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000,
     500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 12000, 14000];
 const ratingsFrequencies = [...frequencies];
-const bracketFrequenciesAndAmps = []; //frequencies.slice(0, frequencies.length / 3);
-//let bracketFrequencies = [2000, 4000, 8000];
+const bracketFrequenciesAndAmps = [];
+
 // assume all frequencies will be heard, and only mark them otherwise if they are not.
 const heardFrequencies = Array(frequencies.length).fill(true);
 const pitchMatchResult = [];
@@ -191,17 +191,6 @@ const switchToQualityMatching = () => {
     setUpPitchAndQualityMatching();  //This sets up the buttons only
 }
 
-// const prepPitchMatchingAmplitudes = () => {
-//     console.log('pitchMatchingAmplitude before', pitchMatchingAmplitude);
-//     for (step = 0; step < pitchRatingAmplitude.length; step++) {
-//         pitchMatchingAmplitude[step] =
-//         (ampInit[step]
-//             + ampInit[step + pitchRatingAmplitude.length]
-//             + ampInit[step + (2 * pitchRatingAmplitude.length)]) / 3;
-//     }
-//     console.log('pitchMatchingAmplitude AFTER', pitchMatchingAmplitude);
-// }
-
 // skip anything NOT heard as well as 5000, 7000, 10000
 const prepForPitchMatching = () => {
     const skipUs = [5000, 7000, 10000]
@@ -280,7 +269,7 @@ const handleQualityMatching = (event) => {
         playTwoSounds('Tonal', 'Noisy', soundEar, amplitude / 6, amplitude, tone, tone);
     }
  }
-// TODO Make sure done button is disabled while sound plays.
+
 const handlePitchRating = (event) => {
     console.log(`In handlePitchRating with event.target.id of ${event.target.id}`)
     // if (event.target.id === 'startId') {
@@ -541,7 +530,6 @@ const handleCalibrateAnswer = (event) => {
     console.log("The clicked button has id " + buttonId);
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testSettings[buttonId]
-    // const amplitude = buttonId === 'testHigh' ? null : ampInit[testValues.calPass]
     const amplitude = ampInit[testValues.calPass]
     playOneSound(tinnitusTypeMeasured, soundEar, amplitude, testValues.tonef, buttonId)
     $("#finish").prop('disabled', false);
@@ -617,11 +605,10 @@ const handleNoiseCalibration = (buttonId) => {
     console.log(`The clicked button has id ${buttonId}`)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testNoiseSettings[buttonId]
-    const amplitude = ampInit[0]; 
-    console.log(`amplitude is ${amplitude}`)
+    const amplitude = ampInit[0];
     playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
-    $("#finish").prop('disabled', false);
-    $("#finish").css({'opacity': '1','cursor': 'pointer' });
+    // $("#finish").prop('disabled', false);
+    // $("#finish").css({'opacity': '1','cursor': 'pointer' });
 }
 
 //{freq: frequencies[i], amplitude: amplitude}
@@ -647,7 +634,6 @@ const switchToResidualInhibition = () => {
 
 const switchToCalibration = () => {
     currentPhase = 'calibrate';
-    console.log('Hello from switch tocalibration');
     $('#testButtons').removeClass('is-invisible').show();
     $("#down").html("Make Softer").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
     $("#up").html("Make Louder").prop('disabled', true).css({'opacity': '.1', 'cursor': 'not-allowed'});
@@ -840,7 +826,7 @@ const handleParticipantForm = () => {
         console.log(`SUBMITTING ${JSON.stringify(participantData)}`);
         $.ajax({
              type: 'POST',
-             url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/start/',
+             url: 'https://whatever/Prod/start/',
              dataType: 'json',
              data: JSON.stringify(participantData)
         })
@@ -850,7 +836,6 @@ const handleParticipantForm = () => {
                 $('#participation').hide();
                 $('#experiment').show();
                 $('footer.footer').show();
-                // ampInit
                 const value = participantData['hearingLoss'] === 'HL' ?
                     INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
                 ampInit = Array(frequencies.length).fill(value);
@@ -863,13 +848,6 @@ const handleParticipantForm = () => {
 
 const submitExperimentResults = (completedResidualInhibition) => {
     console.log(`submit whatever data collected....${completedResidualInhibition}`)
-    // TODO see tintest function of the same name
-    // for (let i = 0; i < frequencies.length; i++) {
-    //     participantData['CalFreq'+i] = frequencies[i];
-    // }
-    // for (let i = 0; i < ampInit.length; i++) {
-    //     participantData['CalAmp'+i] = ampInit[i];
-    // }
     participantData['frequencies'] = frequencies;
     participantData['amplitudes'] = ampInit;
     participantData['tinnitusTypeMeasured'] = tinnitusTypeMeasured;
@@ -878,18 +856,10 @@ const submitExperimentResults = (completedResidualInhibition) => {
     participantData['tinnutusReports'] = tinnutusReports;
     participantData['completedResidualInhibition'] = completedResidualInhibition;
     participantData['endTime'] = new Date();
-    // participantData['clinicalRating'] = tinitusRating
-    // for (let i = 0; i < ratingsFrequencies.length; i++) {
-    //     participantData['rfreqs'+i] = ratingsFrequencies[i];
-    // }
-    // for (let i = 0; i < rating.length; i++) {
-    //     participantData['rating'+i] = rating[i];
-    // }
     console.log('POSTING DATA', participantData)
-    // POST
     $.ajax({
         type : 'POST',
-         url: 'https://xcca7zh3n1.execute-api.us-east-2.amazonaws.com/Prod/complete/',
+         url: 'https://whatever/Prod/complete/',
          dataType: 'json',
          data: JSON.stringify(participantData)
      }).done(() => {
