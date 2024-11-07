@@ -1,6 +1,6 @@
 "use strict";
-const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.001;
-const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is 100 times bigger than initial amp for no HL - this is 40 dB
+const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.00316;
+const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is bigger than initial amp for no HL - this is 30 dB
 const TONE_DURATION = 2
 let participantData = {};
 let soundEar = "R";
@@ -338,7 +338,7 @@ const addRIInstructions = () => {
                     <li>This sound will play for one minute. </li>\
                     <li>When the sound stops, you will be asked what percentage of your tinnitus is left. </li>\
                     <li>The scale is 0% (no tinnitus) to 100% (tinnitus is the same as before the sound) </li>\
-                    <li>You will be prompted to do this every 30 seconds until your tinnitus returns to 100% or 4 minutes have passed. </li>\
+                    <li>You will be prompted to do this 15 seconds until your tinnitus returns to 100% or 4 minutes have passed. </li>\
                     <li>Do this for each of the sound buttons. </li><br>\
                     <li>Note: This sound might be a bit loud. If you think it is hurting your ears, click the stop button and remove your earphones.  </li>\
                     <li>Note: You will see an orange circle while sound is playing.");
@@ -696,20 +696,20 @@ const enableNextResidualInhibitionButton = () => {
     }
 
 }
-const doTinnitusReporting = (tone, count) => {
+const doTinnitusReporting = (tone, amplitude, count) => {
     let tinnitusPercentage = prompt('Indicate how much of your tinnitus is left. 0 indicates no tinnitus and 100 is full tinnitus. Click ok when you have entered your rating.')
     const timestamp = Date.now()
     const report = tinnutusReports.find(el => el.tone === tone)
     if (report) {
         report.percentages.push({tinnitusPercentage, timestamp})
     } else {
-        tinnutusReports.push({tone: tone, percentages: [{tinnitusPercentage, timestamp}]});
+        tinnutusReports.push({tone: tone, amplitude: amplitude, percentages: [{tinnitusPercentage, timestamp}]});
     }
     console.log(`pushing ${tinnitusPercentage} onto tinnitusReports with count of ${count}`)
-    if (!(tinnitusPercentage === '100' || count === 8)) {
+    if (!(tinnitusPercentage === '100' || count === 16)) {
         setTimeout(() => {
-            doTinnitusReporting(tone,count + 1)
-        }, 25000)
+            doTinnitusReporting(tone, amplitude, count + 1)
+        }, 10000)
     } else {
         enableNextResidualInhibitionButton()
     }
@@ -747,7 +747,7 @@ function playTestButtonsSound(tinnitusType, ear, amplitude, tone, duration, butt
         $("#soundIndicator").css({'opacity': '0'}); // Turning off the button while playing
         if (buttonId) {
             $('#' + buttonId).addClass('played')
-            doTinnitusReporting(tone, 0);
+            doTinnitusReporting(tone, amplitude, 0);
         } else {
             $('#testButtons>button').prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
             $('#testButtons>button.notAudible').prop('disabled', true).css({'opacity': '0', 'cursor': 'none'});
@@ -858,7 +858,7 @@ const submitExperimentResults = (completedResidualInhibition) => {
     participantData['endTime'] = new Date();
     console.log('POSTING DATA', participantData)
     $.ajax({
-        type : 'POST',
+         type: 'POST',
          url: 'https://whatever/Prod/complete/',
          dataType: 'json',
          data: JSON.stringify(participantData)
