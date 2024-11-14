@@ -1,6 +1,7 @@
 "use strict";
-const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.00316;
-const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is bigger than initial amp for no HL - this is 30 dB
+const INITIAL_AMPLITUDE_NO_HEARING_LOSS = 0.001;  //Changing calibration so both of these are now 1.0  //0.00316
+const INITIAL_AMPLITUDE_HEARING_LOSS = 0.1;   //This number is bigger than initial amp for no HL - this is 30 dB  0.1
+const INITIAL_AMPLITUDE = 0.85;     //Set for a calibration sound of 3 bands of noise with same rms
 const TONE_DURATION = 2
 let participantData = {};
 let soundEar = "R";
@@ -264,7 +265,9 @@ const handleQualityMatching = (event) => {
         switchToCalibration();
     } else if (event.target.id === 'startId') {
         const tone = 2000;
-        const amplitude = participantData['hearingLoss'] === 'HL' ? INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS
+        const amplitude = INITIAL_AMPLITUDE / 100;
+        console.log("Hello from Handble quality matching")
+        //const amplitude = participantData['hearingLoss'] === 'HL' ? INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS
         playTwoSounds('Tonal', 'Noisy', soundEar, amplitude, amplitude, tone, tone, '#startId');
     }
  }
@@ -566,7 +569,7 @@ const handleResidualInhibition = (event) => {
     // make the amplitude 50 decibels above the amplitude matching the "tinnitus loudness"
     //let amplitude = pitchRatingAmplitude[toneIndex] * 316;
     // make the amplitude ? decibels above the amplitude matchign the "tinnitus loudness"
-    let amplitude = pitchRatingAmplitude[toneIndex] * 100
+    let amplitude = pitchRatingAmplitude[toneIndex] * 316;  //This sets RI sound to 50 dB above tinnitus match
     if (amplitude > 1) {
         amplitude = 1;
     }
@@ -601,8 +604,9 @@ const handleNoiseCalibration = (buttonId) => {
     // console.log(`The clicked button has id ${buttonId}`)
     $("#ansButtons button").prop('disabled', false).css({'opacity': '1', 'cursor': 'pointer'});
     testValues = testNoiseSettings[buttonId]
-    const amplitude = ampInit[0];
-    playOneSound('Noisy', soundEar, amplitude, testValues.tonef, buttonId)
+    const amplitude = INITIAL_AMPLITUDE;
+    //  Plays a 3-band sound (1000, 3000, 6000 Hz) for calibration
+    playOneSound('Noisy', soundEar, amplitude, 3, buttonId)
 }
 
 const prepButton = (idSelector, tone) => {
@@ -830,8 +834,9 @@ const handleParticipantForm = () => {
                 $('#participation').hide();
                 $('#experiment').show();
                 $('footer.footer').show();
+                //const value = INITIAL_AMPLITUDE;
                 const value = participantData['hearingLoss'] === 'HL' ?
-                    INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
+                     INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
                 ampInit = Array(frequencies.length).fill(value);
             })
             .fail(() => {
