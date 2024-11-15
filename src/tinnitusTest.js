@@ -266,8 +266,7 @@ const handleQualityMatching = (event) => {
     } else if (event.target.id === 'startId') {
         const tone = 2000;
         const amplitude = INITIAL_AMPLITUDE / 100;
-        console.log("Hello from Handble quality matching")
-        //const amplitude = participantData['hearingLoss'] === 'HL' ? INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS
+        console.log(`handleQualityMatching with event id ${event.target.id}`)
         playTwoSounds('Tonal', 'Noisy', soundEar, amplitude, amplitude, tone, tone, '#startId');
     }
  }
@@ -622,9 +621,9 @@ const switchToResidualInhibition = () => {
     $('div.RatingFormContainer').hide();
     addRIInstructions();
     $("#testButtons>button").removeAttr('tone').removeClass('notAudible');
-    prepButton('#testHigh', 8000);
+    prepButton('#testHigh', 1000);
     prepButton('#testMid', 4000);
-    prepButton("#testLow", 1000);
+    prepButton("#testLow", 8000);
     // $('#finish').show().prop('disabled',true).css({'opacity': '1'}).html('Submit percentage');
 }
 
@@ -664,7 +663,7 @@ function playOneSound(tinnitusType, ear, amplitude, tone, buttonId) {
 
     sound.on('end', () => {
         if (buttonId) {
-            $('#'+buttonId).prop('disabled', false);
+            $('#'+buttonId).prop('disabled', false).css({'cursor': 'pointer'});
         }
         $("#finish").prop('disabled', false).css({'cursor': 'pointer'});
         $("#ansButton1 button").prop('disabled', false).css({'cursor': 'pointer', 'opacity' : '1'});
@@ -834,9 +833,8 @@ const handleParticipantForm = () => {
                 $('#participation').hide();
                 $('#experiment').show();
                 $('footer.footer').show();
-                //const value = INITIAL_AMPLITUDE;
                 const value = participantData['hearingLoss'] === 'HL' ?
-                     INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
+                    INITIAL_AMPLITUDE_HEARING_LOSS : INITIAL_AMPLITUDE_NO_HEARING_LOSS;
                 ampInit = Array(frequencies.length).fill(value);
             })
             .fail(() => {
